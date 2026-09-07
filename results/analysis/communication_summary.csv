@@ -1,0 +1,5 @@
+condition_id,experiment_id,platform_id,comparability,workload,throughput_unit,strategy,gpus,trials,avg_allreduce_time_seconds,avg_nccl_bandwidth_gbps,avg_throughput_tokens_sec,communication_to_compute_ratio
+E113@l40s,E113,l40s,platform_specific,gpt2_small,training_tokens_per_second,ddp,2,3,0.00434430552025636,17.490253742417952,66354.78698154035,
+E114@l40s,E114,l40s,platform_specific,gpt2_small,training_tokens_per_second,fsdp,2,3,0.003212655335664749,20.89724265156558,66379.1934254788,
+E117@l40s,E117,l40s,platform_specific,distilbert,training_tokens_per_second,ddp,2,3,0.03045460300830503,9.169530305136014,310799.59931543336,
+E118@l40s,E118,l40s,platform_specific,distilbert,training_tokens_per_second,fsdp,2,3,0.0031901019625365738,21.03949339223512,289365.701742708,

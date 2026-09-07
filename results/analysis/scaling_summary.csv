@@ -1,0 +1,22 @@
+platform_id,comparability,phase,workload,model,precision,strategy,scaling_type,throughput_unit,gpus,runtime_seconds,baseline_gpus,baseline_runtime_seconds,speedup,scaling_efficiency,throughput_tokens_sec,throughput_samples_sec,trials
+h100,exact,Strong scaling,distilbert,distilbert-base-uncased,bf16,ddp,strong,training_tokens_per_second,1.0,7.575180373697852,1.0,7.575180373697852,1.0,1.0,865143.2968309661,1689.7330016229807,3
+h100,exact,Strong scaling,distilbert,distilbert-base-uncased,bf16,ddp,strong,training_tokens_per_second,2.0,4.370192147325724,1.0,7.575180373697852,1.733374670569891,0.8666873352849455,1499617.024058116,2928.9395001135076,3
+h100,exact,Strong scaling,distilbert,distilbert-base-uncased,bf16,ddp,strong,training_tokens_per_second,4.0,2.578509285619172,1.0,7.575180373697852,2.9378138818215813,0.7344534704553953,2541627.454486804,4964.116122044539,3
+h100,exact,Strong scaling,gpt2_small,gpt2,bf16,ddp,strong,training_tokens_per_second,2.0,25.2575297106135,2.0,25.2575297106135,1.0,1.0,259471.1461955138,253.38979120655645,3
+h100,exact,Strong scaling,gpt2_small,gpt2,bf16,ddp,strong,training_tokens_per_second,4.0,13.39813624396144,2.0,25.2575297106135,1.8851524757405798,0.9425762378702899,489142.861398329,477.6785755843057,3
+h100,exact,Weak scaling,distilbert,distilbert-base-uncased,bf16,ddp,weak,training_tokens_per_second,1.0,2.3813763433524096,1.0,2.3813763433524096,1.0,1.0,688005.8316527987,1343.7613899468724,3
+h100,exact,Weak scaling,distilbert,distilbert-base-uncased,bf16,ddp,weak,training_tokens_per_second,2.0,2.6064855530081936,1.0,2.3813763433524096,1.827284778791233,0.9136349674388253,1257182.5838987625,2455.4347341772705,3
+h100,exact,Weak scaling,distilbert,distilbert-base-uncased,bf16,ddp,weak,training_tokens_per_second,4.0,2.5777256476770467,1.0,2.3813763433524096,3.69532936870486,0.9238284708453827,2542408.155546799,4965.6409288023415,3
+h100,exact,Weak scaling,gpt2_small,gpt2,bf16,ddp,weak,training_tokens_per_second,1.0,13.043166451660605,1.0,13.043166451660605,1.0,1.0,125613.72993916021,122.66965814371115,3
+h100,exact,Weak scaling,gpt2_small,gpt2,bf16,ddp,weak,training_tokens_per_second,2.0,13.450143823361335,1.0,13.043166451660605,1.9394831692092875,0.9697417829098706,243625.715038602,237.91573734238477,3
+h100,exact,Weak scaling,gpt2_small,gpt2,bf16,ddp,weak,training_tokens_per_second,4.0,13.422512196353637,1.0,13.043166451660605,3.8869505345310866,0.9717380964797272,488254.3547314624,476.8108932924437,3
+l40s,capacity_adjusted,Strong scaling,tinyllama,TinyLlama/TinyLlama-1.1B-Chat-v1.0,bf16,ddp,strong,training_tokens_per_second,1.0,180.83001908520237,1.0,180.83001908520237,1.0,1.0,9060.6730816657,8.84831355631416,3
+l40s,capacity_adjusted,Strong scaling,tinyllama,TinyLlama/TinyLlama-1.1B-Chat-v1.0,bf16,ddp,strong,training_tokens_per_second,2.0,106.38394582597539,1.0,180.83001908520237,1.6997867270406297,0.8498933635203149,15400.822396996138,15.039865622066541,3
+l40s,exact,Strong scaling,distilbert,distilbert-base-uncased,bf16,ddp,strong,training_tokens_per_second,1.0,23.064154502470046,1.0,23.064154502470046,1.0,1.0,284147.64982265537,554.9758785598738,3
+l40s,exact,Strong scaling,distilbert,distilbert-base-uncased,bf16,ddp,strong,training_tokens_per_second,2.0,12.811999143722156,1.0,23.064154502470046,1.8001995038979859,0.9000997519489929,511523.0328016928,999.0684234408062,3
+l40s,exact,Strong scaling,tinyllama,TinyLlama/TinyLlama-1.1B-Chat-v1.0,bf16,ddp,strong,training_tokens_per_second,2.0,82.34222033790623,2.0,82.34222033790623,1.0,1.0,19897.55395530605,19.431205034478566,3
+l40s,exact,Weak scaling,distilbert,distilbert-base-uncased,bf16,ddp,weak,training_tokens_per_second,1.0,5.77205119933933,1.0,5.77205119933933,1.0,1.0,283852.5903700331,554.3995905664709,3
+l40s,exact,Weak scaling,distilbert,distilbert-base-uncased,bf16,ddp,weak,training_tokens_per_second,2.0,6.936021322384477,1.0,5.77205119933933,1.6643721037592327,0.8321847542064656,472436.3329916797,922.7272128743745,3
+l40s,exact,Weak scaling,gpt2_small,gpt2,bf16,ddp,weak,training_tokens_per_second,1.0,35.79463058508312,1.0,35.79463058508312,1.0,1.0,45772.298828971725,44.6995105751677,3
+l40s,exact,Weak scaling,gpt2_small,gpt2,bf16,ddp,weak,training_tokens_per_second,2.0,37.394647019760065,1.0,35.79463058508312,1.9144245496234884,0.9572126878525832,87627.61257088592,85.57384040125578,3
+l40s,platform_specific,Telemetry revalidation,gpt2_small,gpt2,bf16,ddp,weak,training_tokens_per_second,2.0,37.47781702829525,2.0,37.47781702829525,1.0,1.0,87433.05584482026,85.38384359845729,3

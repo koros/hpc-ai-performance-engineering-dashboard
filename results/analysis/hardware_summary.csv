@@ -1,0 +1,5 @@
+condition_id,experiment_id,platform_id,comparability,workload,model,mode,platform,gpu_model,precision,throughput_unit,trials,avg_throughput_tokens_sec,avg_throughput_samples_sec,avg_latency_p50_ms,avg_memory_used_gb,avg_energy_joules
+E123@l40s,E123,l40s,exact,gpt2_small,gpt2,training,lovelace_l40s,NVIDIA L40S 48GB,bf16,training_tokens_per_second,3,45827.24185801865,44.75316587697134,,28.033203125,
+E124@l40s,E124,l40s,exact,gpt2_small,gpt2,inference,lovelace_l40s,NVIDIA L40S 48GB,bf16,generated_tokens_per_second,3,288.7878168691862,,443.2347245359172,0.796875,
+E127@l40s,E127,l40s,exact,distilbert,distilbert-base-uncased,training,lovelace_l40s,NVIDIA L40S 48GB,bf16,training_tokens_per_second,3,282559.8543111072,551.8747154513812,,4.935546875,
+E128@l40s,E128,l40s,exact,distilbert,distilbert-base-uncased,inference,lovelace_l40s,NVIDIA L40S 48GB,bf16,input_tokens_per_second,3,92126.79716233995,719.7406028307809,1.3832217858483393,0.6497395833333334,
