@@ -4,6 +4,7 @@ E001@l40s,E001,l40s,platform_specific,Environment validation,environment_validat
 E002@h100,E002,h100,platform_specific,Environment validation,environment_validation,training,,1,1,0,sufficient,0,5.000611194001976,5.000611194001976,0.0,0.0,,,,,,,,,,,,
 E002@l40s,E002,l40s,platform_specific,Environment validation,environment_validation,training,,1,1,0,sufficient,0,5.87776363408193,5.87776363408193,0.0,0.0,,,,,,,,,,,,
 E003@h100,E003,h100,platform_specific,Environment validation,environment_validation,training,,1,1,0,sufficient,0,14.533709558018018,14.533709558018018,0.0,0.0,,,,,,,,,,,,
+E003@l40s,E003,l40s,platform_specific,Environment validation,environment_validation,training,,1,1,0,sufficient,0,6.059725211933255,6.059725211933255,0.0,0.0,,,,,,,,,,,,
 E004@h100,E004,h100,platform_specific,Environment validation,environment_validation,training,,1,1,0,sufficient,0,11.090416951978114,11.090416951978114,0.0,0.0,,,,,,,,,,,,
 E004@l40s,E004,l40s,platform_specific,Environment validation,environment_validation,training,,1,1,0,sufficient,0,9.527189527172595,9.527189527172595,0.0,0.0,,,,,,,,,,,,
 E005@h100,E005,h100,platform_specific,Environment validation,environment_validation,training,,1,1,0,sufficient,0,19.131747125065885,19.131747125065885,0.0,0.0,,,,,,,,,,,,

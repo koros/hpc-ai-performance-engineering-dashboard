@@ -25,6 +25,6 @@ l40s,exact,tinyllama,TinyLlama/TinyLlama-1.1B-Chat-v1.0,inference,fp16,generated
 l40s,exact,tinyllama,TinyLlama/TinyLlama-1.1B-Chat-v1.0,training,bf16,training_tokens_per_second,18,75.73200942808762,12305.304687779048,12.016899109159226,29.193684895833332,,,13.849656899770102,1037667.6511997044,
 l40s,platform_specific,distilbert,distilbert-base-uncased,training,bf16,training_tokens_per_second,6,81.95091267341438,300082.65052907064,586.0989268145911,5.2890625,,,,,
 l40s,platform_specific,environment_validation,all,inference,bf16,generated_tokens_per_second,1,31.649187362287194,255.82304415539363,,40.609375,7.817903999239206,7.817903999239206,,,
-l40s,platform_specific,environment_validation,all,training,bf16,,4,12.415268170996569,,,0.87890625,,,,,
+l40s,platform_specific,environment_validation,all,training,bf16,,5,11.144159579183906,,,0.84140625,,,,,
 l40s,platform_specific,gpt2_small,gpt2,inference,bf16,generated_tokens_per_second,3,56.10813775798306,288.94020972804316,,0.796875,442.96854028167826,445.0905383486922,,,
 l40s,platform_specific,gpt2_small,gpt2,training,bf16,training_tokens_per_second,18,132.24392199743954,67943.5411804964,66.35111443407851,28.6142578125,,,13.887773831685385,1074943.7765671024,
