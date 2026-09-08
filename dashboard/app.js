@@ -15,6 +15,8 @@ const state = {
   researchFindingSummary: [],
   readinessReport: "",
   loading: true,
+  loadErrors: [],
+  runtimeError: "",
   sort: { table: "rankingTable", key: "throughput_tokens_sec", direction: -1 },
 };
 
@@ -69,7 +71,7 @@ const filterDefinitions = [
 ];
 
 const rankingColumns = ["experiment_id", "platform_id", "comparability", "workload", "status", "throughput_tokens_sec", "throughput_unit", "runtime_seconds"];
-const phaseColumns = ["platform_id", "comparability", "phase", "workload", "completed", "failed", "avg_throughput_tokens_sec", "max_memory_used_gb"];
+const phaseColumns = ["platform_id", "comparability", "phase", "workload", "throughput_unit", "experiments", "completed", "failed"];
 const trialColumns = ["experiment_id", "platform_id", "comparability", "workload", "completed_trials", "failed_trials", "evidence_status", "throughput_tokens_mean", "throughput_tokens_ci95_low", "throughput_tokens_ci95_high"];
 const colors = ["#0f766e", "#2563eb", "#7c3aed", "#b45309", "#be123c", "#0891b2", "#4d7c0f"];
 
@@ -121,21 +123,25 @@ const detailMetricSections = [
 if (typeof document !== "undefined") {
   document.addEventListener("DOMContentLoaded", () => {
     bindInputs();
-    loadDefaultData();
-    render();
+    safeRender();
+    loadDefaultData().catch((error) => {
+      state.loading = false;
+      state.loadErrors.push("Dashboard startup: " + errorMessage(error));
+      updateDashboardAlert();
+    });
   });
 }
 
 function bindInputs() {
-  filterDefinitions.forEach(([id]) => document.getElementById(id).addEventListener("change", render));
-  document.getElementById("evidenceFilter").addEventListener("change", render);
-  document.getElementById("metricFilter").addEventListener("change", render);
+  filterDefinitions.forEach(([id]) => document.getElementById(id).addEventListener("change", safeRender));
+  document.getElementById("evidenceFilter").addEventListener("change", safeRender);
+  document.getElementById("metricFilter").addEventListener("change", safeRender);
   document.getElementById("resetFilters").addEventListener("click", resetFilters);
   document.getElementById("resultsFile").addEventListener("change", (event) => {
     readFile(event.target.files[0]).then((text) => {
       state.results = parseCsv(text);
       rebuildFilters();
-      render();
+      safeRender();
     });
   });
   document.getElementById("analysisFiles").addEventListener("change", async (event) => {
@@ -148,12 +154,12 @@ function bindInputs() {
       if (key) state[key] = rows;
     });
     rebuildFilters();
-    render();
+    safeRender();
   });
   document.getElementById("readinessFile").addEventListener("change", (event) => {
     readFile(event.target.files[0]).then((text) => {
       state.readinessReport = text;
-      render();
+      safeRender();
     });
   });
   document.getElementById("experimentDialogClose").addEventListener("click", closeExperimentDialog);
@@ -174,33 +180,75 @@ function bindInputs() {
 }
 
 async function loadDefaultData() {
+  state.loadErrors = [];
   const entries = Object.entries(paths).filter(([key]) => key !== "readinessReport");
-  const loaded = await Promise.all(entries.map(async ([key, path]) => [key, await fetchCsv(path)]));
+  const loaded = await Promise.all(entries.map(async ([key, path]) => [key, await fetchCsv(path, key)]));
   loaded.forEach(([key, rows]) => {
     state[key] = rows;
   });
-  state.readinessReport = await fetchText(paths.readinessReport);
+  state.readinessReport = await fetchText(paths.readinessReport, "readinessReport");
   state.loading = false;
   rebuildFilters();
-  render();
+  safeRender();
 }
 
-async function fetchCsv(path) {
+async function fetchCsv(path, label) {
   try {
     const response = await fetch(path, { cache: "no-store" });
-    return response.ok ? parseCsv(await response.text()) : [];
-  } catch {
-    return [];
+    if (response.ok) return parseCsv(await response.text());
+    state.loadErrors.push(label + ": HTTP " + response.status);
+  } catch (error) {
+    state.loadErrors.push(label + ": " + errorMessage(error));
   }
+  return [];
 }
 
-async function fetchText(path) {
+async function fetchText(path, label) {
   try {
     const response = await fetch(path, { cache: "no-store" });
-    return response.ok ? response.text() : "";
-  } catch {
-    return "";
+    if (response.ok) return response.text();
+    state.loadErrors.push(label + ": HTTP " + response.status);
+  } catch (error) {
+    state.loadErrors.push(label + ": " + errorMessage(error));
   }
+  return "";
+}
+
+function errorMessage(error) {
+  return error instanceof Error ? error.message : String(error);
+}
+
+function safeRender() {
+  try {
+    render();
+    state.runtimeError = "";
+  } catch (error) {
+    state.runtimeError = errorMessage(error);
+    console.error("Dashboard rendering failed", error);
+  }
+  updateDashboardAlert();
+}
+
+function updateDashboardAlert() {
+  const alert = document.getElementById("dashboardAlert");
+  const message = dashboardAlertMessage({
+    loading: state.loading,
+    loadErrors: state.loadErrors,
+    runtimeError: state.runtimeError,
+    resultCount: state.results.length,
+    protocol: window.location.protocol,
+  });
+  alert.textContent = message;
+  alert.hidden = !message;
+}
+
+function dashboardAlertMessage({ loading, loadErrors, runtimeError, resultCount, protocol }) {
+  if (runtimeError) return "Dashboard rendering stopped: " + runtimeError + ". Check the browser console for details.";
+  if (loading) return "";
+  if (protocol === "file:") return "Results cannot be loaded from a local file URL. Serve the repository root with make serve-dashboard, then open the displayed HTTP address.";
+  if (loadErrors.length) return "Some dashboard evidence could not be loaded: " + loadErrors.join("; ") + ".";
+  if (!resultCount) return "No experiment rows were loaded. Refresh the analysis outputs or select a results CSV manually.";
+  return "";
 }
 
 function readFile(file) {
@@ -317,7 +365,8 @@ function render() {
   renderKpis(rows);
   renderReadiness();
   renderProgress(rows);
-  renderPhaseBars(rows);
+  renderStudyMap(rows);
+  renderPhaseDistributions(rows);
   renderEnergy(rows);
   renderRankingTable();
   renderUncertainty();
@@ -331,7 +380,6 @@ function render() {
   renderPhaseTable();
   renderTrialTable();
   organizeSections();
-  document.getElementById("dataStatus").textContent = state.results.length ? rows.length + " of " + state.results.length + " trial rows" : "No data loaded";
 }
 
 function renderResearchQuestions() {
@@ -535,14 +583,14 @@ function clearFilter(key) {
     if (definition) document.getElementById(definition[0]).value = "";
     if (key === "evidence_status") document.getElementById("evidenceFilter").value = "";
   }
-  render();
+  safeRender();
 }
 
 function resetFilters() {
   filterDefinitions.forEach(([id]) => { document.getElementById(id).value = ""; });
   document.getElementById("evidenceFilter").value = "";
   document.getElementById("metricFilter").value = "";
-  render();
+  safeRender();
 }
 
 function renderReadiness() {
@@ -634,28 +682,203 @@ function buildCompletionEntries(rows) {
   }).sort((left, right) => left.label.localeCompare(right.label));
 }
 
-function renderPhaseBars(rows) {
-  const entries = buildPhaseBarEntries(rows);
-  renderSeparatedBars("phaseBars", entries, {
-    empty: "No throughput values available.",
-    value: (entry) => formatInteger(entry.value) + " " + entry.unit,
-    changing: ["Platform, phase, workload, or experiment condition"],
-    constants: ["comparability", "unit"],
-  });
-  markPanel("phaseBars", entries.length > 0, buildPhaseBarEntries(state.results).length > 0, "Phase throughput", "experiments.csv");
+function renderStudyMap(rows) {
+  const container = document.getElementById("studyMap");
+  const entries = buildStudyCoverageEntries(rows);
+  container.replaceChildren();
+  if (!entries.length) {
+    container.append(emptyState("No completed throughput evidence matches the active filters."));
+  } else {
+    entries.forEach((entry) => {
+      const card = document.createElement("article");
+      card.className = "study-card";
+      const badges = entry.researchQuestions.length
+        ? entry.researchQuestions.map((question) => '<span class="study-rq">' + escapeHtml(question) + "</span>").join("")
+        : '<span class="study-rq study-rq-muted">Supporting evidence</span>';
+      card.innerHTML =
+        '<div class="study-card-heading"><h3>' + escapeHtml(entry.label) + '</h3><div class="study-rqs">' + badges + "</div></div>" +
+        '<div class="study-variable"><span>Variable tested</span><strong>' + escapeHtml(entry.changing) + "</strong></div>" +
+        '<dl class="study-coverage"><div><dt>Conditions</dt><dd>' + formatInteger(entry.conditionIds.length) + '</dd></div><div><dt>Trials</dt><dd>' + formatInteger(entry.trials) + "</dd></div></dl>" +
+        '<p class="study-scope">' + escapeHtml(entry.platforms.join(" + ") || "No platform") + " · " + escapeHtml(entry.workloads.join(" + ") || "No workload") + "</p>" +
+        '<a class="study-link" href="#' + escapeHtml(entry.target) + '">Open controlled view <span aria-hidden="true">→</span></a>';
+      container.append(card);
+    });
+  }
+  const conditionCount = sum(entries.map((entry) => entry.conditionIds.length));
+  document.getElementById("studyMapStatus").textContent = entries.length
+    ? entries.length + " study families · " + formatInteger(conditionCount) + " conditions"
+    : "No study evidence";
+  markPanel("studyMap", entries.length > 0, buildStudyCoverageEntries(state.results).length > 0, "Controlled study map", "experiments.csv", true);
 }
 
-function buildPhaseBarEntries(rows) {
-  const groups = groupRows(rows, (row) => [row.platform_id || "unlabelled", row.comparability || "unspecified", row.phase || "Unassigned", row.workload || "Unassigned", row.throughput_unit || "unit_not_recorded"]);
+function buildStudyCoverageEntries(rows) {
+  const eligible = rows.filter((row) => row.status === "completed" && throughput(row) > 0);
+  const groups = groupRows(eligible, (row) => {
+    const study = studyFamily(row.phase);
+    return [study.label, study.target, study.changing];
+  });
+  return Object.entries(groups).map(([key, group]) => {
+    const [label, target, changing] = key.split("\u0000");
+    return {
+      label,
+      target,
+      changing,
+      conditionIds: uniqueConditionIds(group),
+      trials: group.length,
+      platforms: [...new Set(group.map((row) => row.platform_id).filter(Boolean))].sort(),
+      workloads: [...new Set(group.map((row) => row.workload).filter(Boolean))].sort(),
+      researchQuestions: [...new Set(group.flatMap(researchQuestionsForRow))].sort(),
+    };
+  }).sort((left, right) => left.label.localeCompare(right.label));
+}
+
+function studyFamily(phase) {
+  const value = String(phase || "Unassigned");
+  if (value === "Strong scaling" || value === "Weak scaling") {
+    return { label: "Scaling efficiency", target: "scaling", changing: "GPU count" };
+  }
+  if (value === "Distributed training strategy") {
+    return { label: "Distributed strategies", target: "performance", changing: "DDP, FSDP, or ZeRO strategy" };
+  }
+  if (value === "Memory optimisation") {
+    return { label: "Memory optimisation", target: "memory", changing: "Micro-batch, checkpointing, or accumulation" };
+  }
+  if (value === "Precision study" || value === "Inference precision/quantization") {
+    return { label: "Precision and quantisation", target: "performance", changing: "Numeric precision" };
+  }
+  if (value === "Communication analysis" || value === "Data movement" || value === "Workload characterisation") {
+    return { label: "Bottleneck analysis", target: "scaling", changing: "Communication or data-movement setting" };
+  }
+  if (value.startsWith("Inference")) {
+    return { label: "Inference behaviour", target: "inference", changing: "Framework, request shape, or parallelism" };
+  }
+  if (value === "Hardware comparison") {
+    return { label: "Hardware comparison", target: "research", changing: "GPU platform" };
+  }
+  if (value === "Telemetry revalidation") {
+    return { label: "Useful-work efficiency", target: "overview", changing: "Measured workload condition" };
+  }
+  return { label: "Baseline and validation", target: "evidence", changing: "Workload or validation condition" };
+}
+
+function buildPhaseDistributionEntries(rows) {
+  const eligible = rows.filter((row) => row.status === "completed" && throughput(row) > 0);
+  const byCondition = groupRows(eligible, (row) => [conditionId(row), row.throughput_unit || "unit_not_recorded"]);
+  const conditions = Object.values(byCondition).map((group) => {
+    const first = group[0];
+    return {
+      platform: first.platform_id || "unlabelled",
+      comparability: first.comparability || "unspecified",
+      phase: first.phase || "Unassigned",
+      workload: first.workload || "Unassigned",
+      unit: first.throughput_unit || "unit_not_recorded",
+      conditionId: conditionId(first),
+      value: average(group.map(throughput).filter((value) => value > 0)),
+      trials: group.length,
+    };
+  });
+  const groups = groupRows(conditions, (row) => [row.platform, row.comparability, row.phase, row.workload, row.unit]);
   return Object.entries(groups).map(([key, group]) => {
     const [platform, comparability, phase, workload, unit] = key.split("\u0000");
+    const values = group.map((row) => row.value).filter((value) => value > 0).sort((left, right) => left - right);
     return {
-      label: platform + " · " + comparability + " · " + phase + " · " + workload,
-      platform, comparability, phase, workload, unit,
-      conditionIds: uniqueConditionIds(group),
-      value: average(group.map(throughput).filter((value) => value > 0)),
+      label: phase,
+      platform,
+      comparability,
+      phase,
+      workload,
+      unit,
+      conditionIds: group.map((row) => row.conditionId).filter(Boolean),
+      conditions: group.length,
+      trials: sum(group.map((row) => row.trials)),
+      median: median(values),
+      minimum: values[0] || 0,
+      maximum: values[values.length - 1] || 0,
     };
-  }).filter((entry) => entry.value > 0).sort((left, right) => right.value - left.value).slice(0, 16);
+  }).filter((entry) => entry.median > 0).sort((left, right) => {
+    const leftKey = [left.platform, left.comparability, left.workload, left.unit, left.phase].join("|");
+    const rightKey = [right.platform, right.comparability, right.workload, right.unit, right.phase].join("|");
+    return leftKey.localeCompare(rightKey);
+  });
+}
+
+function renderPhaseDistributions(rows) {
+  const container = document.getElementById("phaseDistributions");
+  const entries = buildPhaseDistributionEntries(rows);
+  const groups = groupRows(entries, (entry) => [entry.platform, entry.comparability, entry.workload, entry.unit]);
+  container.replaceChildren();
+  if (!entries.length) {
+    container.append(emptyState("No completed throughput evidence matches the active filters."));
+  } else {
+    Object.entries(groups).forEach(([key, group], index) => {
+      const [platform, comparability, workload, unit] = key.split("\u0000");
+      const section = document.createElement("details");
+      section.className = "distribution-card";
+      section.open = index === 0;
+      const summary = document.createElement("summary");
+      summary.innerHTML = '<span>' + escapeHtml(platform + " · " + comparability + " · " + workload) + '</span><strong>' + group.length + " phases · " + formatInteger(sum(group.map((entry) => entry.conditions))) + " conditions</strong>";
+      section.append(summary);
+      const body = document.createElement("div");
+      body.className = "distribution-body";
+      body.append(comparisonContract({
+        changing: ["Recorded condition settings within each phase"],
+        constants: [
+          { label: "platform", value: platform },
+          { label: "comparability", value: comparability },
+          { label: "workload", value: workload },
+          { label: "unit", value: unit },
+        ],
+      }));
+      const scaleMaximum = max(group.map((entry) => entry.maximum)) || 1;
+      group.forEach((entry) => body.append(phaseDistributionRow(entry, scaleMaximum)));
+      section.append(body);
+      container.append(section);
+    });
+  }
+  const conditionCount = sum(entries.map((entry) => entry.conditions));
+  document.getElementById("dataStatus").textContent = entries.length
+    ? entries.length + " distributions · " + formatInteger(conditionCount) + " completed conditions"
+    : "No phase evidence";
+  markPanel("phaseDistributions", entries.length > 0, buildPhaseDistributionEntries(state.results).length > 0, "Descriptive phase distributions", "experiments.csv");
+}
+
+function phaseDistributionRow(entry, scaleMaximum) {
+  const row = document.createElement("div");
+  row.className = "distribution-row";
+  const heading = document.createElement("div");
+  heading.className = "distribution-heading";
+  heading.innerHTML = '<strong>' + escapeHtml(entry.phase) + '</strong><span>median ' + formatCompact(entry.median) + " · range " + formatCompact(entry.minimum) + "–" + formatCompact(entry.maximum) + "</span>";
+  row.append(heading);
+  const track = document.createElement("div");
+  track.className = "distribution-track";
+  track.setAttribute("aria-label", entry.phase + ": median " + entry.median + ", range " + entry.minimum + " to " + entry.maximum + " " + entry.unit);
+  const range = document.createElement("span");
+  range.className = "distribution-range";
+  range.style.left = (entry.minimum / scaleMaximum) * 100 + "%";
+  range.style.width = Math.max(1, ((entry.maximum - entry.minimum) / scaleMaximum) * 100) + "%";
+  const marker = document.createElement("span");
+  marker.className = "distribution-median";
+  marker.style.left = (entry.median / scaleMaximum) * 100 + "%";
+  track.append(range, marker);
+  row.append(track);
+  const evidence = document.createElement("details");
+  evidence.className = "distribution-evidence";
+  const evidenceSummary = document.createElement("summary");
+  evidenceSummary.textContent = entry.conditions + " condition" + (entry.conditions === 1 ? "" : "s") + " · " + entry.trials + " trials";
+  evidence.append(evidenceSummary);
+  const conditions = document.createElement("div");
+  conditions.className = "condition-chip-list";
+  entry.conditionIds.forEach((id) => {
+    const chip = document.createElement("button");
+    chip.className = "condition-chip";
+    chip.type = "button";
+    chip.textContent = id;
+    setConditionTarget(chip, id);
+    conditions.append(chip);
+  });
+  evidence.append(conditions);
+  row.append(evidence);
+  return row;
 }
 
 function renderEnergy(rows) {
@@ -996,7 +1219,7 @@ function lineChartCard(series, options, color) {
   const x = linearScale(xDomain[0], xDomain[1], left, width - right);
   const y = linearScale(yDomain[0], yDomain[1], height - bottom, top);
   const line = series.points.map((point, index) => (index ? "L" : "M") + x(point.x) + "," + y(point.y)).join(" ");
-  const xTicks = [xDomain[0], (xDomain[0] + xDomain[1]) / 2, xDomain[1]];
+  const xTicks = pointAxisTicks(series.points.map((point) => point.x), xDomain);
   const yTicks = [yDomain[0], (yDomain[0] + yDomain[1]) / 2, yDomain[1]];
   const grid = xTicks.map((value) => '<line class="svg-grid" x1="' + x(value) + '" y1="' + top + '" x2="' + x(value) + '" y2="' + (height - bottom) + '"/><text class="svg-label" x="' + x(value) + '" y="' + (height - 18) + '" text-anchor="middle">' + formatCompact(value) + "</text>").join("") + yTicks.map((value) => '<line class="svg-grid" x1="' + left + '" y1="' + y(value) + '" x2="' + (width - right) + '" y2="' + y(value) + '"/><text class="svg-label" x="' + (left - 5) + '" y="' + (y(value) + 3) + '" text-anchor="end">' + formatCompact(value) + "</text>").join("");
   const points = series.points.map((point) => '<circle class="svg-point" ' + conditionTargetAttributes(point) + ' fill="' + color + '" cx="' + x(point.x) + '" cy="' + y(point.y) + '" r="4"><title>' + escapeSvg(point.label) + "</title></circle>").join("");
@@ -1030,26 +1253,126 @@ function buildCommunicationEntries(rows) {
 
 function renderDataMovement() {
   const result = filteredAnalysisRows(state.dataMovementSummary, ["platform_id", "comparability", "workload", "throughput_unit"]);
-  const entries = buildDataMovementEntries(result.rows);
-  renderSeparatedBars("movementBars", entries, { empty: result.message || "No completed data-movement evidence.", value: (entry) => formatDecimal(entry.value, 3) + " s", changing: (group) => varyingLabels(group, ["platform", "comparability", "workload", "num_workers", "pinned_memory", "prefetch_factor"]), constants: ["platform", "comparability", "workload"] });
-  document.getElementById("movementStatus").textContent = result.message || entries.length + " conditions";
-  markPanel("movementBars", entries.length > 0, buildDataMovementEntries(state.dataMovementSummary).length > 0, "Data movement", "data_movement_summary.csv", true);
+  const workers = buildDataMovementSeries(result.rows, "num_workers");
+  const prefetch = buildDataMovementSeries(result.rows, "prefetch_factor");
+  const pinned = buildPinnedMemoryGroups(result.rows);
+  renderLineCharts("movementWorkerCharts", workers, { empty: result.message || "No completed worker-count evidence.", xLabel: "DataLoader workers", yLabel: "loading time (ms)" });
+  renderPinnedMemoryCharts("movementPinnedCharts", pinned, result.message || "No completed pinned-memory evidence.");
+  renderLineCharts("movementPrefetchCharts", prefetch, { empty: result.message || "No completed prefetch-factor evidence.", xLabel: "prefetch factor", yLabel: "loading time (ms)" });
+  document.getElementById("movementWorkersStatus").textContent = result.message || workers.length + " controlled curves";
+  document.getElementById("movementPinnedStatus").textContent = result.message || pinned.length + " controlled comparisons";
+  document.getElementById("movementPrefetchStatus").textContent = result.message || prefetch.length + " controlled curves";
+  const allWorkers = buildDataMovementSeries(state.dataMovementSummary, "num_workers");
+  const allPrefetch = buildDataMovementSeries(state.dataMovementSummary, "prefetch_factor");
+  const allPinned = buildPinnedMemoryGroups(state.dataMovementSummary);
+  markPanel("movementWorkerCharts", workers.length > 0, allWorkers.length > 0, "DataLoader worker sweep", "data_movement_summary.csv", true);
+  markPanel("movementPinnedCharts", pinned.length > 0, allPinned.length > 0, "Pinned-memory effect", "data_movement_summary.csv", true);
+  markPanel("movementPrefetchCharts", prefetch.length > 0, allPrefetch.length > 0, "Prefetch-depth sweep", "data_movement_summary.csv", true);
 }
 
-function buildDataMovementEntries(rows) {
-  return rows.map((row) => ({
-    label: row.platform_id + " · " + row.comparability + " · " + row.experiment_id + " · " + row.workload,
-    detail: "workers " + row.num_workers + "; pinned memory " + row.pinned_memory + "; prefetch " + row.prefetch_factor,
-    conditionId: conditionId(row),
-    platform: row.platform_id,
-    comparability: row.comparability,
-    workload: row.workload,
-    num_workers: row.num_workers,
-    pinned_memory: row.pinned_memory,
-    prefetch_factor: row.prefetch_factor,
-    unit: "seconds",
-    value: number(row.avg_data_loading_seconds),
-  })).filter((entry) => entry.value >= 0).sort((left, right) => right.value - left.value);
+function buildDataMovementSeries(rows, studyType) {
+  const definitions = {
+    num_workers: {
+      xField: "num_workers",
+      xLabel: "DataLoader workers",
+      title: "Worker count",
+      constants: ["platform_id", "comparability", "workload", "throughput_unit", "pinned_memory", "prefetch_factor"],
+    },
+    prefetch_factor: {
+      xField: "prefetch_factor",
+      xLabel: "Prefetch factor",
+      title: "Prefetch depth",
+      constants: ["platform_id", "comparability", "workload", "throughput_unit", "num_workers", "pinned_memory"],
+    },
+  };
+  const definition = definitions[studyType];
+  if (!definition) return [];
+  const eligible = rows.filter((row) => row.study_type === studyType && number(row[definition.xField]) >= 0 && number(row.avg_data_loading_seconds) > 0);
+  const grouped = groupRows(eligible, (row) => definition.constants.map((field) => row[field] || "unspecified"));
+  return Object.values(grouped).map((group) => {
+    const first = group[0];
+    return {
+      title: first.platform_id + " · " + first.comparability + " · " + first.workload,
+      subtitle: definition.title + " · loading and transfer time in milliseconds",
+      platform: first.platform_id,
+      comparability: first.comparability,
+      workload: first.workload,
+      unit: first.throughput_unit,
+      studyType,
+      comparison: comparisonContext(group, [definition.xLabel], definition.constants),
+      points: group.map((row) => ({
+        x: number(row[definition.xField]),
+        y: number(row.avg_data_loading_seconds) * 1000,
+        label: definition.xLabel + " " + row[definition.xField] + ": loading " + formatDecimal(number(row.avg_data_loading_seconds) * 1000, 2) + " ms; transfer " + formatDecimal(number(row.avg_transfer_seconds) * 1000, 2) + " ms; " + formatInteger(number(row.avg_throughput_tokens_sec)) + " " + row.throughput_unit + "; " + row.trials + " trials",
+        conditionId: conditionId(row),
+      })).sort((left, right) => left.x - right.x),
+    };
+  }).sort((left, right) => left.title.localeCompare(right.title));
+}
+
+function buildPinnedMemoryGroups(rows) {
+  const eligible = rows.filter((row) => row.study_type === "pinned_memory" && number(row.avg_data_loading_seconds) > 0);
+  const grouped = groupRows(eligible, (row) => [row.platform_id || "unlabelled", row.comparability || "unspecified", row.workload || "unassigned", row.throughput_unit || "unit_not_recorded", row.num_workers || "unspecified", row.prefetch_factor || "unspecified"]);
+  return Object.values(grouped).map((group) => {
+    const first = group[0];
+    return {
+      title: first.platform_id + " · " + first.comparability + " · " + first.workload,
+      subtitle: "Pinned-memory comparison · loading and transfer time in milliseconds",
+      platform: first.platform_id,
+      comparability: first.comparability,
+      workload: first.workload,
+      unit: first.throughput_unit,
+      comparison: comparisonContext(group, ["Pinned memory"], ["platform_id", "comparability", "workload", "throughput_unit", "num_workers", "prefetch_factor"]),
+      entries: group.map((row) => ({
+        label: booleanLabel(row.pinned_memory, "Pinned memory on", "Pinned memory off"),
+        value: number(row.avg_data_loading_seconds) * 1000,
+        transfer: number(row.avg_transfer_seconds) * 1000,
+        throughput: number(row.avg_throughput_tokens_sec),
+        trials: number(row.trials),
+        unit: row.throughput_unit,
+        conditionId: conditionId(row),
+      })).sort((left, right) => left.label.localeCompare(right.label)),
+    };
+  }).sort((left, right) => left.title.localeCompare(right.title));
+}
+
+function renderPinnedMemoryCharts(containerId, groups, emptyMessage) {
+  const container = document.getElementById(containerId);
+  container.replaceChildren();
+  if (!groups.length) {
+    container.append(emptyState(emptyMessage));
+    return;
+  }
+  groups.forEach((group) => container.append(pinnedMemoryChartCard(group)));
+}
+
+function pinnedMemoryChartCard(group) {
+  const card = chartCard(group.title, group.subtitle, group.comparison);
+  const off = group.entries.find((entry) => entry.label.endsWith("off"));
+  const on = group.entries.find((entry) => entry.label.endsWith("on"));
+  if (off && on && off.value > 0) {
+    const loadingChange = ((on.value - off.value) / off.value) * 100;
+    const throughputChange = off.throughput > 0 ? ((on.throughput - off.throughput) / off.throughput) * 100 : 0;
+    const effect = document.createElement("div");
+    effect.className = "movement-effect";
+    effect.innerHTML = '<strong>' + signedPercent(loadingChange) + ' loading time</strong><span>' + signedPercent(throughputChange) + " training throughput with pinned memory</span>";
+    card.append(effect);
+  }
+  const bars = document.createElement("div");
+  bars.className = "movement-comparison-bars";
+  const top = max(group.entries.map((entry) => entry.value)) || 1;
+  group.entries.forEach((entry) => {
+    const row = document.createElement("div");
+    row.className = "bar-row movement-comparison-row";
+    setConditionTarget(row, entry.conditionId);
+    const stateClass = entry.label.endsWith("on") ? "checkpointing-on" : "checkpointing-off";
+    row.innerHTML = '<div class="bar-meta"><strong>' + escapeHtml(entry.label) + '</strong><span>' + formatDecimal(entry.value, 2) + ' ms loading</span></div>' +
+      '<div class="bar-detail">' + formatDecimal(entry.transfer, 2) + " ms transfer · " + formatInteger(entry.throughput) + " " + escapeHtml(entry.unit) + " · " + formatInteger(entry.trials) + ' trials</div>' +
+      '<div class="bar-track"><div class="bar-fill ' + stateClass + '" style="width: ' + Math.max(3, (entry.value / top) * 100) + '%"></div></div>';
+    bars.append(row);
+  });
+  card.append(bars);
+  return card;
 }
 
 function renderInference() {
@@ -1109,7 +1432,7 @@ function renderPhaseTable() {
   const result = filteredAnalysisRows(state.phaseSummary, ["platform_id", "comparability", "phase", "workload", "throughput_unit", "priority", "mode"]);
   renderTable("phaseTable", result.rows, phaseColumns, result.message);
   document.getElementById("phaseCount").textContent = result.message || result.rows.length + " rows";
-  markPanel("phaseTable", result.rows.length > 0, state.phaseSummary.length > 0, "Phase summary", "phase_summary.csv");
+  markPanel("phaseTable", result.rows.length > 0, state.phaseSummary.length > 0, "Phase evidence inventory", "phase_summary.csv");
 }
 
 function renderTrialTable() {
@@ -1414,7 +1737,7 @@ function renderTrialBars(rows, metric) {
 function setSort(table, key) {
   if (state.sort.table === table && state.sort.key === key) state.sort.direction *= -1;
   else state.sort = { table, key, direction: 1 };
-  render();
+  safeRender();
 }
 
 function sortRows(rows, table) {
@@ -1590,6 +1913,13 @@ function average(values) {
   return numeric.length ? sum(numeric) / numeric.length : 0;
 }
 
+function median(values) {
+  const numeric = values.filter((value) => Number.isFinite(value)).sort((left, right) => left - right);
+  if (!numeric.length) return 0;
+  const middle = Math.floor(numeric.length / 2);
+  return numeric.length % 2 ? numeric[middle] : (numeric[middle - 1] + numeric[middle]) / 2;
+}
+
 function displayName(key) {
   return key.replaceAll("_", " ");
 }
@@ -1608,8 +1938,19 @@ function formatDecimal(value, digits) {
   return (value || 0).toLocaleString(undefined, { minimumFractionDigits: digits, maximumFractionDigits: digits });
 }
 
+function signedPercent(value) {
+  const sign = value > 0 ? "+" : "";
+  return sign + formatDecimal(value, 1) + "%";
+}
+
 function formatCompact(value) {
   return Number(value || 0).toLocaleString(undefined, { notation: "compact", maximumFractionDigits: 2 });
+}
+
+function pointAxisTicks(values, domain) {
+  const ticks = [...new Set(values.filter((value) => Number.isFinite(value)))].sort((left, right) => left - right);
+  if (ticks.length && ticks.length <= 8) return ticks;
+  return [domain[0], (domain[0] + domain[1]) / 2, domain[1]];
 }
 
 function emptyState(message) {
@@ -1638,12 +1979,17 @@ if (typeof module !== "undefined" && module.exports) {
     buildGradientAccumulationSeries,
     buildInferenceGroups,
     buildMemorySeries,
-    buildPhaseBarEntries,
+    buildDataMovementSeries,
+    buildPhaseDistributionEntries,
+    buildPinnedMemoryGroups,
     buildRq1ScalingSeries,
     buildRq2StrategyGroups,
     buildScalingSeries,
+    buildStudyCoverageEntries,
     buildUncertaintyGroups,
     comparisonContext,
+    dashboardAlertMessage,
+    pointAxisTicks,
     summarizePhases,
   };
 }
