@@ -1,4 +1,5 @@
 condition_id,experiment_id,platform_id,comparability,workload,model,platform,framework,precision,gpus,batch_size,concurrent_requests,prompt_length,throughput_unit,trials,avg_throughput_tokens_sec,avg_throughput_samples_sec,avg_latency_p50_ms,avg_latency_p95_ms,avg_ttft_p50_ms,avg_queueing_p50_ms,avg_memory_used_gb,avg_energy_joules
+E006@h100,E006,h100,platform_specific,environment_validation,all,lovelace_h100,vllm,bf16,1,,,,generated_tokens_per_second,1,245.24840703665578,,8.15499690361321,8.15499690361321,8.15499690361321,,71.9375,
 E006@l40s,E006,l40s,platform_specific,environment_validation,all,lovelace_l40s,vllm,bf16,1,,,,generated_tokens_per_second,1,255.82304415539363,,7.817903999239206,7.817903999239206,7.817903999239206,,40.609375,
 E010@h100,E010,h100,exact,gpt2_small,gpt2,lovelace_h100,pytorch_eager,bf16,1,1,,128,generated_tokens_per_second,3,292.7216616740463,,437.22836100884405,439.5538891122366,4.8624536527010305,,0.9775390625,6110.307853870396
 E010@l40s,E010,l40s,exact,gpt2_small,gpt2,lovelace_l40s,pytorch_eager,bf16,1,1,,128,generated_tokens_per_second,3,289.3171668521417,,439.61447399730486,441.48324272440124,4.525231352696816,,0.796875,
