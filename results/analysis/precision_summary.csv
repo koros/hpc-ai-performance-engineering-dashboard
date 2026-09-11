@@ -1,9 +1,9 @@
 platform_id,comparability,workload,model,mode,precision,throughput_unit,experiments,avg_runtime_seconds,avg_throughput_tokens_sec,avg_throughput_samples_sec,avg_memory_used_gb,avg_latency_p50_ms,avg_latency_p95_ms,avg_quality_loss,avg_quality_perplexity,avg_quality_accuracy
 h100,exact,distilbert,distilbert-base-uncased,inference,bf16,input_tokens_per_second,9,10.080286824234967,81174.0468419713,634.1722409529008,0.8505859375,1.5541704940713115,1.6025011375960376,,,0.4921875
 h100,exact,distilbert,distilbert-base-uncased,training,bf16,training_tokens_per_second,57,14.869172752154746,1307749.763387767,2554.198756616732,6.4673622532894735,,,2.2796491185824075,,
-h100,exact,gpt2_small,gpt2,inference,bf16,generated_tokens_per_second,57,63.83740213627134,1673.748317704505,,61.15088747258772,392.6363936308853,395.0358658723672,12.862013339996338,385677.63580661314,
+h100,exact,gpt2_small,gpt2,inference,bf16,generated_tokens_per_second,60,64.53916342220619,1603.8022143846506,,61.72327473958333,396.2843341413342,398.7087418611433,12.862013339996338,385677.63580661314,
 h100,exact,gpt2_small,gpt2,training,bf16,training_tokens_per_second,54,27.06231253581225,267285.5888594537,261.02108287056024,29.80544704861111,,,14.029590129852295,1250807.9459506914,
-h100,exact,tinyllama,TinyLlama/TinyLlama-1.1B-Chat-v1.0,inference,bf16,generated_tokens_per_second,57,97.69032099298732,973.2403658108094,,61.49453467653509,724.4507498792046,727.6253401349798,12.68524694442749,323322.0088032365,
+h100,exact,tinyllama,TinyLlama/TinyLlama-1.1B-Chat-v1.0,inference,bf16,generated_tokens_per_second,60,98.1628048736505,933.0785308364425,,62.048763020833334,725.8685980021255,729.0177042451493,12.68524694442749,323322.0088032365,
 h100,exact,tinyllama,TinyLlama/TinyLlama-1.1B-Chat-v1.0,training,bf16,training_tokens_per_second,9,57.937728056244346,29436.859425236355,28.746933032457378,26.786783854166668,,,,,
 h100,platform_specific,environment_validation,all,inference,bf16,generated_tokens_per_second,1,21.432914161821827,245.24840703665578,,71.9375,8.15499690361321,8.15499690361321,,,
 h100,platform_specific,environment_validation,all,training,bf16,,5,10.521776331821457,,,1.2314453125,,,,,

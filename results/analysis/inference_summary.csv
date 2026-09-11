@@ -58,6 +58,7 @@ E145@h100,E145,h100,exact,gpt2_small,gpt2,lovelace_h100,vllm,bf16,1,1,1,640,gene
 E145@l40s,E145,l40s,exact,gpt2_small,gpt2,lovelace_l40s,vllm,bf16,1,1,1,640,generated_tokens_per_second,3,369.78397929715715,,346.02629323489964,348.7540610522653,,,41.0234375,
 E146@h100,E146,h100,exact,gpt2_small,gpt2,lovelace_h100,vllm,bf16,1,1,1,896,generated_tokens_per_second,3,356.4956111589416,,358.4647308258961,362.4370569324431,,,72.4306640625,4858.5429157136105
 E146@l40s,E146,l40s,exact,gpt2_small,gpt2,lovelace_l40s,vllm,bf16,1,1,1,896,generated_tokens_per_second,3,365.50621535358414,,350.1350126074006,352.17633973807096,,,41.01953125,
+E147@h100,E147,h100,exact,gpt2_small,gpt2,lovelace_h100,vllm,bf16,2,1,1,128,generated_tokens_per_second,3,274.82625130741206,,465.59520383986336,468.4933856478892,,,72.5986328125,12147.230568676137
 E147@l40s,E147,l40s,exact,gpt2_small,gpt2,lovelace_l40s,vllm,bf16,2,1,1,128,generated_tokens_per_second,3,289.33265449873534,,442.2570694393168,444.57664651951444,,,41.056640625,
 E149@l40s,E149,l40s,exact,gpt2_small,gpt2,lovelace_l40s,pytorch_eager,fp16,1,1,1,128,generated_tokens_per_second,3,289.11874119597104,,442.81251813905936,444.75523749521625,4.528720785553257,,0.861328125,
 E150@l40s,E150,l40s,exact,gpt2_small,gpt2,lovelace_l40s,pytorch_eager,bf16,1,1,1,128,generated_tokens_per_second,3,289.59805003667424,,441.9349098267655,444.2282710845272,4.538994748145342,,0.8229166666666666,
@@ -113,6 +114,7 @@ E193@h100,E193,h100,exact,tinyllama,TinyLlama/TinyLlama-1.1B-Chat-v1.0,lovelace_
 E193@l40s,E193,l40s,exact,tinyllama,TinyLlama/TinyLlama-1.1B-Chat-v1.0,lovelace_l40s,vllm,bf16,1,1,1,1280,generated_tokens_per_second,3,207.7891122719426,,615.7912386891743,619.5244788813094,,,41.04296875,
 E194@h100,E194,h100,exact,tinyllama,TinyLlama/TinyLlama-1.1B-Chat-v1.0,lovelace_h100,vllm,bf16,1,1,1,1920,generated_tokens_per_second,3,221.01751915388874,,579.1638260319208,581.4665449705595,,,72.4892578125,11942.508501804949
 E194@l40s,E194,l40s,exact,tinyllama,TinyLlama/TinyLlama-1.1B-Chat-v1.0,lovelace_l40s,vllm,bf16,1,1,1,1920,generated_tokens_per_second,3,204.8175096304675,,625.0051368648807,627.7806122632076,,,41.04296875,
+E195@h100,E195,h100,exact,tinyllama,TinyLlama/TinyLlama-1.1B-Chat-v1.0,lovelace_h100,vllm,bf16,2,1,1,128,generated_tokens_per_second,3,170.0036663234736,,752.807712337623,755.4726223383719,,,72.5791015625,23733.529545871035
 E195@l40s,E195,l40s,exact,tinyllama,TinyLlama/TinyLlama-1.1B-Chat-v1.0,lovelace_l40s,vllm,bf16,2,1,1,128,generated_tokens_per_second,3,169.53621233686397,,754.804788933446,757.9131758927057,,,41.034505208333336,
 E197@l40s,E197,l40s,exact,tinyllama,TinyLlama/TinyLlama-1.1B-Chat-v1.0,lovelace_l40s,pytorch_eager,fp16,1,1,1,128,generated_tokens_per_second,3,113.38271553811568,,1129.3427619772654,1131.6544591682032,10.178646926457683,,2.6764322916666665,
 E198@l40s,E198,l40s,exact,tinyllama,TinyLlama/TinyLlama-1.1B-Chat-v1.0,lovelace_l40s,pytorch_eager,bf16,1,1,1,128,generated_tokens_per_second,3,115.0149074080728,,1113.725538443153,1117.5842768124614,10.067427608494958,,2.697265625,
