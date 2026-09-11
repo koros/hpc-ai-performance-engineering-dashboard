@@ -10,7 +10,7 @@ Generated from repository configuration, validation checks, workload registry, a
 - Total E-number configs discovered: 230
 - Validation issues: 0
 - Research-readiness blockers: 0
-- Deferred scope rows: 15
+- Deferred scope rows: 13
 - Registered workloads: distilbert, environment_validation, gpt2_small, synthetic, tinyllama
 - Slurm smoke presets: 6
 - Core environment checks completed: 5/5
@@ -37,14 +37,12 @@ These rows remain in the planning matrix but are excluded from deployment batche
 | `E093` | Requires a selected and validated H100 FP8 training backend with recorded model/runtime support. |
 | `E096` | Requires a selected and validated FP8 inference backend and model artifact. |
 | `E131` | Requires a pinned TensorRT-LLM engine artifact and engine-specific runtime adapter. |
-| `E151` | Requires a selected and validated FP8 inference backend and model artifact. |
 | `E152` | Requires a named quantization method, calibration protocol, and immutable quantized artifact. |
 | `E154` | vLLM is a causal-generation engine and does not provide a validated DistilBERT classification adapter. |
 | `E155` | Requires a classification-compatible TensorRT-LLM contract and a built engine artifact. |
 | `E175` | Requires a selected and validated FP8 inference backend and model artifact. |
 | `E176` | Requires a named quantization method, calibration protocol, and immutable quantized artifact. |
 | `E179` | Requires a site-built TensorRT-LLM engine and validated engine adapter contract. |
-| `E199` | Requires a selected and validated FP8 inference backend and model artifact. |
 | `E200` | Requires a named quantization method, calibration protocol, and immutable quantized artifact. |
 
 ## Cluster Evidence Gate
