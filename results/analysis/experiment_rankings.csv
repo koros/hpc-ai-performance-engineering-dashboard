@@ -788,3 +788,4 @@ E002@l40s,E002,l40s,platform_specific,Environment validation,Must Have,environme
 E003@l40s,E003,l40s,platform_specific,Environment validation,Must Have,environment_validation,all,training,4,bf16,ddp,completed,,,,6.059725211933255,1.0,,,,,,,,18.621653948361054,measured_region,
 E004@l40s,E004,l40s,platform_specific,Environment validation,Must Have,environment_validation,all,training,2,bf16,fsdp,completed,,,,9.527189527172595,0.5,,,,,,,,,legacy_full_window,
 E005@l40s,E005,l40s,platform_specific,Environment validation,Should Have,environment_validation,all,training,2,bf16,deepspeed_zero2,completed,,,,25.744760629720986,0.5,,,,,,,,,legacy_full_window,
+E215@l40s,E215,l40s,platform_specific,Environment validation,Must Have,environment_validation,all,training,8,bf16,ddp,completed,,,,8.099628676194698,0.5,,,,,,,,174.28934345608576,measured_region,
