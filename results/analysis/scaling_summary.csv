@@ -10,6 +10,7 @@ h100,exact,Weak scaling,distilbert,distilbert-base-uncased,bf16,ddp,weak,trainin
 h100,exact,Weak scaling,gpt2_small,gpt2,bf16,ddp,weak,training_tokens_per_second,1.0,13.043166451660605,1.0,13.043166451660605,1.0,1.0,125613.72993916021,122.66965814371115,3
 h100,exact,Weak scaling,gpt2_small,gpt2,bf16,ddp,weak,training_tokens_per_second,2.0,13.450143823361335,1.0,13.043166451660605,1.9394831692092875,0.9697417829098706,243625.715038602,237.91573734238477,3
 h100,exact,Weak scaling,gpt2_small,gpt2,bf16,ddp,weak,training_tokens_per_second,4.0,13.422512196353637,1.0,13.043166451660605,3.8869505345310866,0.9717380964797272,488254.3547314624,476.8108932924437,3
+h100,platform_specific,Telemetry revalidation,gpt2_small,gpt2,bf16,ddp,weak,training_tokens_per_second,2.0,13.43525661737658,2.0,13.43525661737658,1.0,1.0,243895.65760610646,238.17935313096334,3
 l40s,capacity_adjusted,Strong scaling,tinyllama,TinyLlama/TinyLlama-1.1B-Chat-v1.0,bf16,ddp,strong,training_tokens_per_second,1.0,180.83001908520237,1.0,180.83001908520237,1.0,1.0,9060.6730816657,8.84831355631416,3
 l40s,capacity_adjusted,Strong scaling,tinyllama,TinyLlama/TinyLlama-1.1B-Chat-v1.0,bf16,ddp,strong,training_tokens_per_second,2.0,106.38394582597539,1.0,180.83001908520237,1.6997867270406297,0.8498933635203149,15400.822396996138,15.039865622066541,3
 l40s,exact,Strong scaling,distilbert,distilbert-base-uncased,bf16,ddp,strong,training_tokens_per_second,1.0,23.064154502470046,1.0,23.064154502470046,1.0,1.0,284147.64982265537,554.9758785598738,3
