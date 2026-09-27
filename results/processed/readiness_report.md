@@ -5,14 +5,14 @@ Generated from repository configuration, validation checks, workload registry, a
 ## Summary
 
 - Source matrix configs discovered: 200
-- Supplemental platform probes discovered: 25
+- Supplemental platform probes discovered: 71
 - Cross-platform telemetry anchors discovered: 5
-- Total E-number configs discovered: 230
+- Total E-number configs discovered: 276
 - Validation issues: 0
 - Research-readiness blockers: 0
-- Deferred scope rows: 13
-- Registered workloads: distilbert, environment_validation, gpt2_small, synthetic, tinyllama
-- Slurm smoke presets: 6
+- Deferred scope rows: 11
+- Registered workloads: distilbert, environment_validation, gpt2_small, qwen2_5_7b, qwen2_5_7b_long_context, qwen2_5_7b_training, synthetic, tinyllama
+- Slurm smoke presets: 10
 - Core environment checks completed: 5/5
 - Baseline definitions with at least 3 trials: 10/10
 - Pilot evidence gate: READY
@@ -32,9 +32,7 @@ These rows remain in the planning matrix but are excluded from deployment batche
 | Experiment | Reason |
 | --- | --- |
 | `E007` | Implementation is complete locally; final activation requires a successful E007 run on the target H100 node. |
-| `E086` | Requires a selected and validated H100 FP8 training backend with recorded model/runtime support. |
 | `E089` | Requires a selected and validated FP8 inference backend and model artifact. |
-| `E093` | Requires a selected and validated H100 FP8 training backend with recorded model/runtime support. |
 | `E096` | Requires a selected and validated FP8 inference backend and model artifact. |
 | `E131` | Requires a pinned TensorRT-LLM engine artifact and engine-specific runtime adapter. |
 | `E152` | Requires a named quantization method, calibration protocol, and immutable quantized artifact. |
@@ -57,9 +55,12 @@ The pilot gate remains blocked until every core environment check has one valid 
 
 | Workload | Matrix configs | Registry status |
 | --- | ---: | --- |
-| `distilbert` | 85 | PyTorch training/inference implemented |
+| `distilbert` | 92 | PyTorch training/inference implemented |
 | `environment_validation` | 9 | Implemented; cluster verification required |
-| `gpt2_small` | 97 | PyTorch training/inference and vLLM routing implemented |
+| `gpt2_small` | 106 | PyTorch training/inference and vLLM routing implemented |
+| `qwen2_5_7b` | 12 | vLLM low-bit serving implemented |
+| `qwen2_5_7b_long_context` | 3 | vLLM long-context serving implemented |
+| `qwen2_5_7b_training` | 15 | H100-only BF16 FSDP/ZeRO-3 sharding study; canary gated |
 | `tinyllama` | 39 | PyTorch training/inference and vLLM routing implemented |
 
 ## Matrix Breakdown
@@ -68,17 +69,17 @@ The pilot gate remains blocked until every core environment check has one valid 
 
 | Priority | Count |
 | --- | ---: |
-| Must Have | 130 |
+| Must Have | 158 |
 | Optional | 14 |
-| Should Have | 72 |
-| Supplemental | 14 |
+| Should Have | 78 |
+| Supplemental | 26 |
 
 ### By Mode
 
 | Mode | Count |
 | --- | ---: |
-| inference | 96 |
-| training | 134 |
+| inference | 116 |
+| training | 160 |
 
 ### By Phase
 
@@ -90,16 +91,23 @@ The pilot gate remains blocked until every core environment check has one valid 
 | Distributed training strategy | 20 |
 | Environment validation | 9 |
 | Hardware comparison | 8 |
+| Hardware energy revalidation | 4 |
 | Inference batching | 18 |
 | Inference concurrency | 15 |
+| Inference energy anchors | 3 |
 | Inference framework | 9 |
+| Inference long-context prompt length | 3 |
 | Inference multi-GPU | 7 |
-| Inference precision/quantization | 12 |
+| Inference precision/quantization | 20 |
 | Inference prompt length | 12 |
-| Memory optimisation | 27 |
-| Precision study | 14 |
-| Strong scaling | 14 |
+| Large-model distributed strategy | 6 |
+| Large-model training update controls | 6 |
+| Low-bit quality robustness | 4 |
+| Memory optimisation | 31 |
+| Precision study | 18 |
+| Strong scaling | 15 |
 | Telemetry revalidation | 5 |
+| Training update validation | 3 |
 | Weak scaling | 8 |
 | Workload characterisation | 12 |
 
