@@ -50,7 +50,7 @@ Each finding card also links to a **"Supporting Evidence & Analysis"** section a
 the page, which is the deliberate exception to the plain-language rule: exact experiment IDs,
 trial counts, comparability classes (`exact` / `platform_specific` / `capacity_adjusted`),
 unrounded figures, and the source pipeline's own methodology/limitation notes, quoted rather than
-paraphrased. It exists so a technical reader (a supervisor, an examiner, future-you) can verify
+paraphrased. It exists so a technical reader (a researcher or reviewer) can verify
 every rounded claim above against its exact source condition without leaving the page.
 
 That section opens with three at-a-glance charts before the detail tables:
@@ -219,7 +219,7 @@ parameters with an explicit "no completed trial yet" note instead of blank/misle
 
 Linked from the main report's top nav ("Experiment Catalog") and from the Supporting Evidence section
 intro. `experiments-data.json` is kept alongside as a plain data export of the same hierarchy (same
-source the page embeds inline), in case it's useful to hand to a supervisor or reuse elsewhere.
+source the page embeds inline), for independent verification and reuse.
 
 Verification: full-coverage stress test (every one of the 276 experiment cards and all 52 workload
 row-groups rendered through the actual page JS in Node with zero exceptions), tag-balance and CSS
@@ -277,7 +277,7 @@ represented in the catalog yet, consistent with how every prior wave here was on
 trial data existed.
 
 **2026-10-01** — Added the H100 TinyLlama weak-scaling results (E287-E289, three trials each,
-gnode01, completed 1 October) to both pages, using the newly regenerated pipeline
+research-node-a, completed 1 October) to both pages, using the newly regenerated pipeline
 (`python -m hpc_ai_perf.cli refresh`). The new
 `scripts/update_dashboard_tinyllama_weak_scaling.py` rebuilt the catalog entries, cluster totals and
 `EXPERIMENT_DETAILS` (now 99 entries) from processed trials, and reproduced the existing L40S
