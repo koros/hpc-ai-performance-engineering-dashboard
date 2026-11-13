@@ -4,6 +4,9 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Part 2 &middot; Analysis &amp; Findings &middot; HPC AI Performance Engineering</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" />
 <link rel="icon" type="image/svg+xml" href="logo.svg" />
 <style>
   :root {
@@ -23,6 +26,8 @@
     --orange: #eb6834;
     --aqua: #1baf7a;
     --violet: #4a3aa7;
+    --gold: #eda100;
+    --pink: #e87ba4;
 
     --seq-1: #86b6ef;
     --seq-2: #5598e7;
@@ -47,6 +52,8 @@
       --orange: #d95926;
       --aqua: #199e70;
       --violet: #9085e9;
+      --gold: #c98500;
+      --pink: #d55181;
 
       --seq-1: #6da7ec;
       --seq-2: #3987e5;
@@ -60,7 +67,7 @@
   body {
     background: var(--page);
     color: var(--text-primary);
-    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
     line-height: 1.5;
     padding-bottom: 64px;
   }
@@ -205,22 +212,23 @@
 
   .chart-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
     gap: 16px;
     margin: 18px 0 22px;
   }
   .chart-panel {
-    background: var(--surface);
+    min-width: 0;
+    background: var(--page);
     border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 18px 20px 14px;
+    border-radius: 12px;
+    padding: 20px 22px 18px;
   }
   .chart-panel .chart-title { font-size: 14px; font-weight: 700; margin: 0 0 2px; }
   .chart-panel .chart-sub { font-size: 12.5px; color: var(--text-muted); margin: 0 0 10px; }
   .chart-panel svg { width: 100%; height: auto; display: block; overflow: visible; }
   .legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 8px; font-size: 12.5px; color: var(--text-secondary); }
   .legend .item { display: flex; align-items: center; gap: 6px; }
-  .legend .swatch { width: 10px; height: 10px; border-radius: 3px; flex: 0 0 auto; }
+  .legend .swatch { width: 14px; height: 4px; border-radius: 2px; flex: 0 0 auto; }
 
   .bar-label { font-size: 11.5px; fill: var(--text-secondary); }
   .bar-value { font-size: 12.5px; font-weight: 700; fill: var(--text-primary); }
@@ -278,6 +286,8 @@
 
   section#nerds {
     background: var(--surface-2);
+    padding: 40px 28px;
+    border-radius: 16px;
   }
   section#nerds .section-intro { max-width: 74ch; }
   .nerd-callout {
@@ -303,7 +313,7 @@
   .nerd-block h3 {
     font-size: 15px;
     margin: 0 0 4px;
-    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   }
   .nerd-block .nerd-method {
     font-size: 13px;
@@ -321,7 +331,7 @@
     border-collapse: collapse;
     width: 100%;
     min-width: 520px;
-    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     font-size: 12px;
   }
   table.nerd-table caption { display: none; }
@@ -381,7 +391,7 @@
     font-size: 12.5px;
   }
   .meter-row .meter-label {
-    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     color: var(--text-secondary);
     white-space: nowrap;
     overflow: hidden;
@@ -413,7 +423,7 @@
   }
   .meter-fill.partial { background: var(--blue); }
   .meter-count {
-    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     color: var(--text-muted);
     text-align: right;
     font-size: 11.5px;
@@ -470,7 +480,7 @@
   }
   .drawer-header h3 {
     font-size: 16px; margin: 0;
-    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     word-break: break-word;
   }
   .drawer-close {
@@ -488,7 +498,7 @@
   }
   .exp-card:last-child { margin-bottom: 0; }
   .exp-card h4 {
-    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     font-size: 14px; margin: 0 0 2px;
   }
   .exp-card .exp-sub { font-size: 12.5px; color: var(--text-muted); margin: 0 0 10px; }
@@ -497,7 +507,7 @@
     gap: 5px 14px; font-size: 12.5px; margin-bottom: 4px;
   }
   .exp-meta { margin-bottom: 10px; }
-  .exp-metric-grid { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+  .exp-metric-grid { font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
   .exp-meta .k, .exp-metric-grid .k { color: var(--text-muted); font-family: inherit; }
   .exp-platform { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border); }
   .exp-platform:first-of-type { margin-top: 8px; }
@@ -507,14 +517,129 @@
   }
   .exp-note { grid-column: 1 / -1; color: var(--text-muted); font-style: italic; }
 
+.inference-condition { margin: 12px 0; border: 1px solid var(--border); border-radius: 12px; padding: 18px 22px; background: var(--page); }
+.inference-condition summary { cursor: pointer; font-size: 14px; font-weight: 600; }
+.inference-condition[open] summary { margin-bottom: 14px; }
+details.nerd-block { padding: 18px 22px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+details.nerd-block > summary { cursor: pointer; font-weight: 600; }
 /* Current inference evidence; offline charts use the same rows as the tables. */
-.live-chart { margin: 20px 0; display: grid; gap: 10px; }
+.live-chart { margin: 14px 0; display: grid; gap: 10px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--page); }
 .live-bar-row { display: grid; grid-template-columns: 90px minmax(60px,1fr) 110px; align-items: center; gap: 10px; font-size: .85rem; }
-.live-bar-track { background: var(--line, #e7e9ed); border-radius: 4px; overflow: hidden; }
-.live-bar { height: 18px; background: var(--accent, #5354d7); border-radius: 4px; }
+.live-bar-track { background: var(--surface-2); border-radius: 4px; overflow: hidden; }
+.live-bar { height: 18px; background: var(--blue); border-radius: 4px; }
+.live-bar-row[data-layout^="tp2"] .live-bar { background: var(--orange); }
+.live-bar-row[data-layout^="tp4"] .live-bar { background: var(--aqua); }
+.live-bar-row[data-layout^="tp8"] .live-bar { background: var(--violet); }
+.live-bar-row strong { font-variant-numeric: tabular-nums; }
 .table-wrap { overflow-x: auto; }
 @media (max-width: 520px) { .live-bar-row { grid-template-columns: 72px minmax(40px,1fr) 88px; font-size: .75rem; } }
 
+  @media (max-width: 600px) {
+    section#nerds { padding: 28px 16px; }
+    .chart-panel, .finding-card, .coverage-overview,
+    .nerd-callout, .inference-condition, details.nerd-block {
+      padding: 18px 16px;
+    }
+  }
+
+  /* Section navigation groups */
+  nav.jump .jump-grp { font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); padding: 0 2px 0 10px; white-space: nowrap; align-self: center; }
+  /* Long identifiers (e.g. metric_nvidia_smi_power_draw_watts_measured_region) may break rather than widen the page */
+  main code { overflow-wrap: anywhere; }
+
+  /* Real text: padding and packing (rendered by real-text.js) */
+  #real-text { --tok: var(--blue); --tok2: var(--seq-2, #5598e7); --padc: var(--surface-2); }
+  .rt-diagram { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 4px 0 6px; }
+  .rt-mode { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; }
+  .rt-mode-t { margin: 0 0 8px; font-weight: 700; font-size: 13px; }
+  .rt-mode-d { margin: 8px 0 0; font-size: 12px; color: var(--text-muted); }
+  .rt-seqs { display: grid; gap: 3px; }
+  .rt-batch { display: grid; gap: 3px; padding: 3px; border: 1.5px dashed var(--baseline); border-radius: 5px; margin-bottom: 3px; width: max-content; }
+  .rt-seq { display: flex; gap: 2px; }
+  .rt-seq i, .rt-key i { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
+  i.tok { background: var(--tok); } i.tok.d1 { background: var(--tok2); opacity: .6; }
+  i.pad { background: var(--padc); box-shadow: inset 0 0 0 1px var(--baseline); }
+  .rt-key { font-size: 12px; color: var(--text-muted); margin: 0 0 18px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .rt-controls { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 12px; }
+  .seg-rt { display: inline-flex; border: 1px solid var(--border); border-radius: 9px; overflow: hidden; background: var(--surface); }
+  .seg-rt button { font: inherit; font-size: 12.5px; font-weight: 600; border: 0; background: transparent; color: var(--text-secondary); padding: 6px 12px; cursor: pointer; }
+  .seg-rt button + button { border-left: 1px solid var(--border); }
+  .seg-rt button[aria-checked="true"] { background: var(--text-primary); color: var(--page); }
+  .seg-rt button:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; }
+  .rt-chart { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px 18px; display: grid; gap: 14px; }
+  .rt-row { display: grid; grid-template-columns: 130px minmax(80px, 1fr) 150px; grid-template-areas: "lbl track val" ". mult mult" ". pad padval" ". src src"; gap: 3px 12px; align-items: center; font-size: 12.5px; color: var(--text-secondary); }
+  .rt-row.best .rt-lbl, .rt-row.best .rt-val { color: var(--text-primary); font-weight: 700; }
+  .rt-lbl { grid-area: lbl; font-weight: 600; } .rt-val { grid-area: val; font-variant-numeric: tabular-nums; } .rt-val small { color: var(--text-muted); font-weight: 400; }
+  .rt-track { grid-area: track; position: relative; height: 16px; background: var(--surface-2); border-radius: 4px; }
+  .rt-bar { position: absolute; inset: 0 auto 0 0; background: var(--blue); border-radius: 4px; }
+  .rt-whisk { position: absolute; top: 50%; height: 2px; margin-top: -1px; background: var(--text-primary); opacity: .55; }
+  .rt-mult { grid-area: mult; font-variant-numeric: tabular-nums; } .rt-ci { color: var(--text-muted); font-size: 11.5px; }
+  .rt-padbar { grid-area: pad; height: 6px; background: var(--surface-2); border-radius: 999px; overflow: hidden; }
+  .rt-padbar span { display: block; height: 100%; background: var(--baseline); }
+  .rt-padval { grid-area: padval; font-size: 11.5px; color: var(--text-muted); }
+  .rt-strag { display: inline-block; margin-left: 4px; font-weight: 700; color: var(--warning, #b77900); }
+  .rt-src { grid-area: src; font-size: 11.5px; }
+  .rt-foot { font-size: 12px; color: var(--text-muted); margin: 8px 0 0; }
+  .rt-warn { font-size: 12.5px; color: var(--text-secondary); background: rgba(183,121,0,0.10); border-left: 3px solid var(--warning, #b77900); border-radius: 0 8px 8px 0; padding: 6px 10px; margin: 0 0 10px; }
+  #real-text > details.nerd-block { margin: 18px 0 12px; }
+  @media (max-width: 600px) { .rt-row { grid-template-columns: 1fr; grid-template-areas: "lbl" "track" "val" "mult" "pad" "padval" "src"; } }
+
+  /* Serving layouts (rendered by serving-layouts.js) */
+  #inference-parallelization { --tp1: var(--blue); --tp2: var(--orange); --tp4: var(--aqua); --tp8: var(--violet); }
+  details.nerd-block > summary { cursor: pointer; font-weight: 600; }
+  details.nerd-block[open] > summary { margin-bottom: 8px; }
+  #inference-parallelization > details.nerd-block { margin: 18px 0 12px; }
+  .sl-diagram { margin: 4px 0 22px; display: grid; gap: 8px; max-width: 560px; }
+  .sl-diag-row { display: grid; grid-template-columns: 150px 1fr; gap: 12px; align-items: center; font-size: 13px; color: var(--text-secondary); }
+  .sl-diag-gpus { display: flex; gap: 8px; flex-wrap: wrap; }
+  .sl-rep { display: inline-flex; gap: 3px; padding: 3px; border: 1.5px solid var(--baseline); border-radius: 6px; }
+  .sl-rep i { width: 14px; height: 14px; border-radius: 3px; display: block; }
+  .sl-rep.tp1 i { background: var(--tp1); } .sl-rep.tp2 i { background: var(--tp2); } .sl-rep.tp4 i { background: var(--tp4); } .sl-rep.tp8 i { background: var(--tp8); }
+  .sl-diagram figcaption { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+  .sl-answers { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin: 18px 0; }
+  .sl-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; }
+  .sl-card-k { font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 8px; }
+  .sl-card ul { margin: 0; padding: 0; list-style: none; font-size: 13.5px; }
+  .sl-card li { margin: 6px 0; line-height: 1.6; }
+  .sl-chip { display: inline-flex; align-items: center; gap: 5px; font-weight: 600; font-size: 12.5px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .sl-chip i { width: 9px; height: 9px; border-radius: 3px; display: inline-block; }
+  .sl-chip.tp1 i { background: var(--tp1); } .sl-chip.tp2 i { background: var(--tp2); } .sl-chip.tp4 i { background: var(--tp4); } .sl-chip.tp8 i { background: var(--tp8); }
+  .sl-m { color: var(--text-muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+  table.sl-matrix { border-collapse: collapse; width: 100%; font-size: 13px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  #inference-parallelization .table-wrap { overflow-x: auto; border-radius: 12px; }
+  table.sl-matrix tbody th[scope="row"], table.sl-matrix thead th:first-child { position: sticky; left: 0; z-index: 1; background: var(--surface); }
+  table.sl-matrix thead th:first-child, table.sl-matrix tr.sl-grp th { background: var(--surface-2); }
+  table.sl-matrix tr.sl-row:hover th[scope="row"] { background: var(--surface-2); }
+  table.sl-matrix tr.sl-row.sel th[scope="row"] { background: color-mix(in srgb, var(--blue) 10%, var(--surface)); }
+  .sl-cap { font-size: 12.5px; color: var(--text-muted); margin: 0 0 8px; }
+  .sl-key { grid-column: 1 / -1; font-size: 12px; color: var(--text-muted); margin: 0; }
+  table.sl-matrix th, table.sl-matrix td { padding: 8px 12px; border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
+  table.sl-matrix thead th { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); background: var(--surface-2); }
+  table.sl-matrix thead th span { display: block; text-transform: none; letter-spacing: 0; font-weight: 500; }
+  table.sl-matrix tr.sl-grp th { background: var(--surface-2); font-size: 12px; color: var(--text-primary); }
+  table.sl-matrix tbody th[scope="row"] { font-weight: 500; color: var(--text-secondary); }
+  tr.sl-row { cursor: pointer; } tr.sl-row:hover td, tr.sl-row:hover th { background: var(--surface-2); }
+  tr.sl-row.sel td, tr.sl-row.sel th { background: color-mix(in srgb, var(--blue) 10%, var(--surface)); }
+  tr.sl-row.sel th[scope="row"] { box-shadow: inset 3px 0 0 var(--blue); color: var(--text-primary); }
+  tr.sl-row:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; }
+  .sl-detail { margin-top: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; }
+  .sl-detail:empty { display: none; }
+  .sl-detail-head { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
+  .sl-detail-head h3 { margin: 0; font-size: 15px; }
+  .sl-minis { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px 24px; }
+  .sl-mini-t { margin: 0 0 6px; font-size: 13px; font-weight: 700; }
+  .sl-mini-t span { font-weight: 400; color: var(--text-muted); font-size: 11.5px; }
+  .sl-bar-row { display: grid; grid-template-columns: 58px minmax(40px, 1fr) 128px; gap: 8px; align-items: center; font-size: 12.5px; margin: 3px 0; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+  .sl-bar-row.win { color: var(--text-primary); font-weight: 600; }
+  .sl-bar-track { background: var(--surface-2); border-radius: 4px; height: 14px; overflow: hidden; }
+  .sl-bar { display: block; height: 100%; border-radius: 4px; }
+  .sl-bar.tp1 { background: var(--tp1); } .sl-bar.tp2 { background: var(--tp2); } .sl-bar.tp4 { background: var(--tp4); } .sl-bar.tp8 { background: var(--tp8); }
+  .sl-src { font-size: 12.5px; color: var(--text-secondary); margin: 14px 0 0; line-height: 1.8; }
+  .sl-notes { margin: 0; padding-left: 18px; font-size: 13px; color: var(--text-secondary); }
+  .sl-notes li { margin: 4px 0; }
+  @media (max-width: 600px) { .sl-diag-row { grid-template-columns: 1fr; gap: 4px; } .sl-detail { padding: 16px 14px; } .sl-bar-row { grid-template-columns: 52px minmax(30px, 1fr) 112px; } }
+
+  button, input, select, textarea { font-family: inherit; }
 </style>
 </head>
 <body>
@@ -525,6 +650,9 @@
     <nav class="part-nav" aria-label="Report sections">
       <a class="part-pill" href="index.html">Part 1 &middot; Experiment Catalog</a>
       <a class="part-pill active" href="analysis.html">Part 2 &middot; Analysis &amp; Findings</a>
+      <a class="part-pill" href="studies.html">Part 3 &middot; Detailed Studies</a>
+      <a class="part-pill" href="recommendations.html">Part 4 &middot; Recommendations</a>
+      <a class="part-pill" href="diagnostics.html">Part 5 &middot; Diagnostics</a>
     </nav>
     <h1>How well do these AI training chips really perform?</h1>
     <p class="lede">
@@ -533,32 +661,43 @@
       train or run AI models.
     </p>
     <p class="snapshot-line" id="snapshotLine">Loading snapshot&hellip;</p>
-    <p class="snapshot-line">Base findings snapshot through 27 September 2026; later sections add the TinyLlama strategy study, the two-platform TinyLlama weak-scaling wave, and the L40S scaling deep dive collected 6&ndash;7 October. The L40S hardware-energy anchors collected on 28 September are listed in the catalog but are not yet included in the findings.</p>
+    <p class="snapshot-line">The L40S hardware-energy anchors (E235&ndash;E238) are listed in the catalog but are not yet included in the findings.</p>
   </div>
 </header>
+<aside class="wrap" style="margin:24px auto;padding:20px;border:1px solid var(--border);border-radius:14px;background:var(--surface)">
+  <p class="eyebrow">Start with the results</p>
+  <h2 style="margin:6px 0">What worked, where, and how confidently?</h2>
+  <p>Explore the current study summaries: plain-language findings, matched comparisons, confidence intervals and downloadable evidence tables. H100 and L40S results stay separate.</p>
+  <a href="studies.html" style="color:var(--blue);font-weight:700">Explore current findings &rarr;</a>
+</aside>
 
-<nav class="jump">
+
+<nav class="jump" aria-label="Sections">
   <div class="wrap">
     <a href="#glance">At a glance</a>
+    <span class="jump-grp">Training</span>
     <a href="#scaling">More chips</a>
-    <a href="#scaling-deep-dive">Scaling deep dive</a>
-    <a href="#strategy">Splitting the work</a>
-    <a href="#precision">Number formats</a>
+    <a href="#scaling-deep-dive">What limits scaling</a>
     <a href="#communication">Chips talking</a>
+    <a href="#strategy">Splitting the model</a>
+    <a href="#precision">Number formats</a>
+    <a href="#real-text">Real text</a>
+    <span class="jump-grp">Serving</span>
+    <a href="#batching">Many users</a>
+    <a href="#inference-parallelization">Several chips</a>
+    <span class="jump-grp">Hardware &amp; energy</span>
     <a href="#hardware">Chip types</a>
-    <a href="#batching">Serving many people</a>
     <a href="#power">Power &amp; energy</a>
     <a href="#lowbit">7B model</a>
+    <span class="jump-grp">Wrap-up</span>
     <a href="#recommendations">What to do</a>
-    <a href="#nerds">Supporting Evidence</a>
-    <a href="index.html">Part 1 &middot; Experiment Catalog</a>
+    <a href="#nerds">Supporting evidence</a>
   </div>
 </nav>
 
 <main class="wrap">
 
   <section id="glance">
-    <p class="snapshot-line">Current collected inference evidence appears first below. The original research-question cards retain their dated historical scope.</p>
     <p class="section-kicker">At a glance</p>
     <h2>The six-second version</h2>
     <p class="section-intro">
@@ -592,7 +731,7 @@
       </div>
       <div class="kpi">
         <div class="value" id="coverageKpi">747 / 817</div>
-        <div class="label">planned conditions complete (79%)</div>
+        <div class="label">planned conditions complete (91%)</div>
       </div>
       <div class="kpi">
         <div class="value good">Up to 2.4&times;</div>
@@ -605,167 +744,8 @@
     </div>
   </section>
 
-<!-- LIVE_INFERENCE_START -->
-<section id="inference-parallelization">
-<p class="section-kicker">Latest measured studies</p>
-<h2>Inference parallelization: speed, first-token delay and energy</h2>
-<p>More GPUs per model is not always faster. These comparisons hold the node GPU budget fixed and split it between model shards and independent serving replicas. TinyLlama favoured single-GPU replicas; Qwen7B favoured TP2 throughput, with a demand-dependent energy trade-off.</p>
-<p>TP2 × DP4 means four replicas, each spread over two GPUs. All results below use BF16, 128 fixed output tokens and the recorded serving runtime. Acceptance trials are excluded. Values are means across independent trials; throughput ranges show minimum–maximum across trials. p95 values are means of within-trial percentiles.</p>
-<p><a href="index.html">Browse every condition and its platform status →</a></p>
-<p><strong>Study design:</strong> the concurrency-two extension is a <strong>follow-up motivated by observed results</strong>, planned on 21 October 2026 after E763/E764 and E767/E768. It is distinct from the original experiment plan; only collected performance trials appear below.</p>
-<h3>New training and acceptance coverage</h3>
-<p>The catalog now includes every checked-in E-number condition. Completed means at least one platform has the required collected trials; it does not imply both platforms are complete. Acceptance is displayed separately from performance evidence.</p>
-<div class="table-wrap"><table class="nerd-table"><thead><tr><th>L40S study</th><th>Completed conditions</th><th>Selected-cohort trials</th><th>Source range</th></tr></thead><tbody>
-<tr><td>Accumulation</td><td>48/48</td><td>144</td><td>E386@l40s–E433@l40s</td></tr>
-<tr><td>Sequence split</td><td>72/72</td><td>216</td><td>E434@l40s–E505@l40s</td></tr>
-<tr><td>Model size</td><td>28/28</td><td>84</td><td>E506@l40s–E533@l40s</td></tr>
-<tr><td>DDP communication</td><td>45/45</td><td>135</td><td>E534@l40s–E578@l40s</td></tr>
-<tr><td>Training stacks</td><td>29/29</td><td>87</td><td>E579@l40s–E607@l40s</td></tr>
-<tr><td>Placement/topology</td><td>13/22</td><td>40</td><td>E608@l40s–E633@l40s</td></tr>
-<tr><td>Real text</td><td>32/32</td><td>96</td><td>E638@l40s–E669@l40s</td></tr>
-<tr><td>Precision</td><td>0/28</td><td>0</td><td>E670@l40s–E697@l40s</td></tr>
-</tbody></table></div>
-<h3>Qwen2.5-7B-Instruct · L40S · prompt 128 · concurrency 8</h3>
-<div class="live-chart" role="group" aria-label="Output throughput by layout">
-<div class="live-bar-row"><span>tp1_dp8</span><div class="live-bar-track"><div class="live-bar" style="width:61.65%"></div></div><strong>376.2 tok/s</strong></div>
-<div class="live-bar-row"><span>tp2_dp4</span><div class="live-bar-track"><div class="live-bar" style="width:100.00%"></div></div><strong>610.3 tok/s</strong></div>
-<div class="live-bar-row"><span>tp4_dp2</span><div class="live-bar-track"><div class="live-bar" style="width:96.16%"></div></div><strong>586.9 tok/s</strong></div>
-</div><div class="table-wrap"><table class="nerd-table"><thead><tr><th>Layout</th><th>Trials</th><th>Output tok/s</th><th>p95 TTFT (ms)</th><th>p95 time/token (ms)</th><th>J/output token</th><th>Source</th></tr></thead><tbody>
-<tr><td>tp1_dp8</td><td>3</td><td>376.2<br><small>376.2–376.3</small></td><td>29.0</td><td>21.20</td><td>5.60</td><td>E752@l40s</td></tr>
-<tr><td>tp2_dp4</td><td>3</td><td>610.3<br><small>609.5–610.7</small></td><td>24.5</td><td>13.02</td><td>2.83</td><td>E753@l40s</td></tr>
-<tr><td>tp4_dp2</td><td>3</td><td>586.9<br><small>582.8–590.0</small></td><td>35.0</td><td>13.59</td><td>2.03</td><td>E757@l40s</td></tr>
-</tbody></table></div>
-<h3>Qwen2.5-7B-Instruct · L40S · prompt 1280 · concurrency 1</h3>
-<div class="live-chart" role="group" aria-label="Output throughput by layout">
-<div class="live-bar-row"><span>tp1_dp8</span><div class="live-bar-track"><div class="live-bar" style="width:59.91%"></div></div><strong>46.0 tok/s</strong></div>
-<div class="live-bar-row"><span>tp2_dp4</span><div class="live-bar-track"><div class="live-bar" style="width:100.00%"></div></div><strong>76.7 tok/s</strong></div>
-<div class="live-bar-row"><span>tp4_dp2</span><div class="live-bar-track"><div class="live-bar" style="width:99.45%"></div></div><strong>76.3 tok/s</strong></div>
-</div><div class="table-wrap"><table class="nerd-table"><thead><tr><th>Layout</th><th>Trials</th><th>Output tok/s</th><th>p95 TTFT (ms)</th><th>p95 time/token (ms)</th><th>J/output token</th><th>Source</th></tr></thead><tbody>
-<tr><td>tp1_dp8</td><td>3</td><td>46.0<br><small>46.0–46.0</small></td><td>91.8</td><td>21.28</td><td>17.75</td><td>E762@l40s</td></tr>
-<tr><td>tp2_dp4</td><td>3</td><td>76.7<br><small>76.7–76.8</small></td><td>71.8</td><td>12.60</td><td>12.07</td><td>E763@l40s</td></tr>
-<tr><td>tp4_dp2</td><td>3</td><td>76.3<br><small>76.2–76.5</small></td><td>72.8</td><td>12.85</td><td>13.00</td><td>E764@l40s</td></tr>
-</tbody></table></div>
-<h3>Qwen2.5-7B-Instruct · L40S · prompt 1280 · concurrency 2</h3>
-<div class="live-chart" role="group" aria-label="Output throughput by layout">
-<div class="live-bar-row"><span>tp2_dp4</span><div class="live-bar-track"><div class="live-bar" style="width:99.63%"></div></div><strong>153.4 tok/s</strong></div>
-<div class="live-bar-row"><span>tp4_dp2</span><div class="live-bar-track"><div class="live-bar" style="width:100.00%"></div></div><strong>153.9 tok/s</strong></div>
-</div><div class="table-wrap"><table class="nerd-table"><thead><tr><th>Layout</th><th>Trials</th><th>Output tok/s</th><th>p95 TTFT (ms)</th><th>p95 time/token (ms)</th><th>J/output token</th><th>Source</th></tr></thead><tbody>
-<tr><td>tp2_dp4</td><td>3</td><td>153.4<br><small>153.2–153.6</small></td><td>71.1</td><td>12.60</td><td>8.44</td><td>E771@l40s</td></tr>
-<tr><td>tp4_dp2</td><td>3</td><td>153.9<br><small>152.3–155.2</small></td><td>72.6</td><td>12.67</td><td>8.46</td><td>E772@l40s</td></tr>
-</tbody></table></div>
-<h3>Qwen2.5-7B-Instruct · L40S · prompt 1280 · concurrency 4</h3>
-<div class="live-chart" role="group" aria-label="Output throughput by layout">
-<div class="live-bar-row"><span>tp2_dp4</span><div class="live-bar-track"><div class="live-bar" style="width:100.00%"></div></div><strong>306.5 tok/s</strong></div>
-<div class="live-bar-row"><span>tp4_dp2</span><div class="live-bar-track"><div class="live-bar" style="width:91.87%"></div></div><strong>281.6 tok/s</strong></div>
-</div><div class="table-wrap"><table class="nerd-table"><thead><tr><th>Layout</th><th>Trials</th><th>Output tok/s</th><th>p95 TTFT (ms)</th><th>p95 time/token (ms)</th><th>J/output token</th><th>Source</th></tr></thead><tbody>
-<tr><td>tp2_dp4</td><td>3</td><td>306.5<br><small>306.0–307.1</small></td><td>71.7</td><td>12.60</td><td>6.10</td><td>E767@l40s</td></tr>
-<tr><td>tp4_dp2</td><td>3</td><td>281.6<br><small>281.5–281.8</small></td><td>142.1</td><td>13.87</td><td>4.38</td><td>E768@l40s</td></tr>
-</tbody></table></div>
-<h3>Qwen2.5-7B-Instruct · L40S · prompt 1280 · concurrency 8</h3>
-<div class="live-chart" role="group" aria-label="Output throughput by layout">
-<div class="live-bar-row"><span>tp1_dp8</span><div class="live-bar-track"><div class="live-bar" style="width:64.78%"></div></div><strong>366.8 tok/s</strong></div>
-<div class="live-bar-row"><span>tp2_dp4</span><div class="live-bar-track"><div class="live-bar" style="width:100.00%"></div></div><strong>566.2 tok/s</strong></div>
-<div class="live-bar-row"><span>tp4_dp2</span><div class="live-bar-track"><div class="live-bar" style="width:92.26%"></div></div><strong>522.4 tok/s</strong></div>
-</div><div class="table-wrap"><table class="nerd-table"><thead><tr><th>Layout</th><th>Trials</th><th>Output tok/s</th><th>p95 TTFT (ms)</th><th>p95 time/token (ms)</th><th>J/output token</th><th>Source</th></tr></thead><tbody>
-<tr><td>tp1_dp8</td><td>3</td><td>366.8<br><small>366.6–366.9</small></td><td>92.4</td><td>21.26</td><td>5.85</td><td>E754@l40s</td></tr>
-<tr><td>tp2_dp4</td><td>3</td><td>566.2<br><small>565.6–567.1</small></td><td>142.1</td><td>13.66</td><td>3.14</td><td>E755@l40s</td></tr>
-<tr><td>tp4_dp2</td><td>3</td><td>522.4<br><small>517.0–526.7</small></td><td>282.1</td><td>14.89</td><td>2.43</td><td>E758@l40s</td></tr>
-</tbody></table></div>
-<h3>TinyLlama-1.1B-Chat-v1.0 · H100 · prompt 128 · concurrency 1</h3>
-<div class="live-chart" role="group" aria-label="Output throughput by layout">
-<div class="live-bar-row"><span>tp1_dp4</span><div class="live-bar-track"><div class="live-bar" style="width:100.00%"></div></div><strong>170.9 tok/s</strong></div>
-<div class="live-bar-row"><span>tp2_dp2</span><div class="live-bar-track"><div class="live-bar" style="width:76.45%"></div></div><strong>130.7 tok/s</strong></div>
-<div class="live-bar-row"><span>tp4</span><div class="live-bar-track"><div class="live-bar" style="width:78.33%"></div></div><strong>133.9 tok/s</strong></div>
-</div><div class="table-wrap"><table class="nerd-table"><thead><tr><th>Layout</th><th>Trials</th><th>Output tok/s</th><th>p95 TTFT (ms)</th><th>p95 time/token (ms)</th><th>J/output token</th><th>Source</th></tr></thead><tbody>
-<tr><td>tp1_dp4</td><td>3</td><td>170.9<br><small>169.3–171.8</small></td><td>9.9</td><td>5.87</td><td>3.02</td><td>E738@h100</td></tr>
-<tr><td>tp2_dp2</td><td>3</td><td>130.7<br><small>129.1–131.6</small></td><td>11.8</td><td>7.73</td><td>3.98</td><td>E739@h100</td></tr>
-<tr><td>tp4</td><td>3</td><td>133.9<br><small>132.4–134.9</small></td><td>12.0</td><td>7.46</td><td>4.70</td><td>E740@h100</td></tr>
-</tbody></table></div>
-<h3>TinyLlama-1.1B-Chat-v1.0 · H100 · prompt 128 · concurrency 8</h3>
-<div class="live-chart" role="group" aria-label="Output throughput by layout">
-<div class="live-bar-row"><span>tp1_dp4</span><div class="live-bar-track"><div class="live-bar" style="width:100.00%"></div></div><strong>1,171.5 tok/s</strong></div>
-<div class="live-bar-row"><span>tp2_dp2</span><div class="live-bar-track"><div class="live-bar" style="width:82.44%"></div></div><strong>965.8 tok/s</strong></div>
-<div class="live-bar-row"><span>tp4</span><div class="live-bar-track"><div class="live-bar" style="width:80.26%"></div></div><strong>940.2 tok/s</strong></div>
-</div><div class="table-wrap"><table class="nerd-table"><thead><tr><th>Layout</th><th>Trials</th><th>Output tok/s</th><th>p95 TTFT (ms)</th><th>p95 time/token (ms)</th><th>J/output token</th><th>Source</th></tr></thead><tbody>
-<tr><td>tp1_dp4</td><td>3</td><td>1,171.5<br><small>1,165.5–1,176.4</small></td><td>9.8</td><td>6.82</td><td>0.56</td><td>E741@h100</td></tr>
-<tr><td>tp2_dp2</td><td>3</td><td>965.8<br><small>961.4–970.0</small></td><td>12.3</td><td>8.29</td><td>0.61</td><td>E742@h100</td></tr>
-<tr><td>tp4</td><td>3</td><td>940.2<br><small>935.9–945.6</small></td><td>12.9</td><td>8.54</td><td>0.67</td><td>E743@h100</td></tr>
-</tbody></table></div>
-<h3>TinyLlama-1.1B-Chat-v1.0 · H100 · prompt 1280 · concurrency 1</h3>
-<div class="live-chart" role="group" aria-label="Output throughput by layout">
-<div class="live-bar-row"><span>tp1_dp4</span><div class="live-bar-track"><div class="live-bar" style="width:100.00%"></div></div><strong>167.2 tok/s</strong></div>
-<div class="live-bar-row"><span>tp2_dp2</span><div class="live-bar-track"><div class="live-bar" style="width:77.29%"></div></div><strong>129.2 tok/s</strong></div>
-<div class="live-bar-row"><span>tp4</span><div class="live-bar-track"><div class="live-bar" style="width:79.06%"></div></div><strong>132.2 tok/s</strong></div>
-</div><div class="table-wrap"><table class="nerd-table"><thead><tr><th>Layout</th><th>Trials</th><th>Output tok/s</th><th>p95 TTFT (ms)</th><th>p95 time/token (ms)</th><th>J/output token</th><th>Source</th></tr></thead><tbody>
-<tr><td>tp1_dp4</td><td>3</td><td>167.2<br><small>166.8–168.1</small></td><td>10.3</td><td>6.01</td><td>3.11</td><td>E744@h100</td></tr>
-<tr><td>tp2_dp2</td><td>3</td><td>129.2<br><small>128.9–129.7</small></td><td>12.0</td><td>7.79</td><td>4.08</td><td>E745@h100</td></tr>
-<tr><td>tp4</td><td>3</td><td>132.2<br><small>131.0–132.9</small></td><td>12.2</td><td>7.55</td><td>4.81</td><td>E746@h100</td></tr>
-</tbody></table></div>
-<h3>TinyLlama-1.1B-Chat-v1.0 · H100 · prompt 1280 · concurrency 8</h3>
-<div class="live-chart" role="group" aria-label="Output throughput by layout">
-<div class="live-bar-row"><span>tp1_dp4</span><div class="live-bar-track"><div class="live-bar" style="width:100.00%"></div></div><strong>1,132.4 tok/s</strong></div>
-<div class="live-bar-row"><span>tp2_dp2</span><div class="live-bar-track"><div class="live-bar" style="width:81.34%"></div></div><strong>921.0 tok/s</strong></div>
-<div class="live-bar-row"><span>tp4</span><div class="live-bar-track"><div class="live-bar" style="width:76.96%"></div></div><strong>871.5 tok/s</strong></div>
-</div><div class="table-wrap"><table class="nerd-table"><thead><tr><th>Layout</th><th>Trials</th><th>Output tok/s</th><th>p95 TTFT (ms)</th><th>p95 time/token (ms)</th><th>J/output token</th><th>Source</th></tr></thead><tbody>
-<tr><td>tp1_dp4</td><td>3</td><td>1,132.4<br><small>1,122.9–1,141.2</small></td><td>18.4</td><td>7.05</td><td>0.61</td><td>E747@h100</td></tr>
-<tr><td>tp2_dp2</td><td>3</td><td>921.0<br><small>906.7–938.8</small></td><td>41.6</td><td>8.65</td><td>0.68</td><td>E748@h100</td></tr>
-<tr><td>tp4</td><td>3</td><td>871.5<br><small>868.3–875.3</small></td><td>82.1</td><td>9.14</td><td>0.76</td><td>E749@h100</td></tr>
-</tbody></table></div>
-<h3>TinyLlama-1.1B-Chat-v1.0 · L40S · prompt 128 · concurrency 1</h3>
-<div class="live-chart" role="group" aria-label="Output throughput by layout">
-<div class="live-bar-row"><span>tp1_dp8</span><div class="live-bar-track"><div class="live-bar" style="width:100.00%"></div></div><strong>194.4 tok/s</strong></div>
-<div class="live-bar-row"><span>tp2_dp4</span><div class="live-bar-track"><div class="live-bar" style="width:75.18%"></div></div><strong>146.2 tok/s</strong></div>
-<div class="live-bar-row"><span>tp4_dp2</span><div class="live-bar-track"><div class="live-bar" style="width:52.67%"></div></div><strong>102.4 tok/s</strong></div>
-<div class="live-bar-row"><span>tp8</span><div class="live-bar-track"><div class="live-bar" style="width:50.62%"></div></div><strong>98.4 tok/s</strong></div>
-</div><div class="table-wrap"><table class="nerd-table"><thead><tr><th>Layout</th><th>Trials</th><th>Output tok/s</th><th>p95 TTFT (ms)</th><th>p95 time/token (ms)</th><th>J/output token</th><th>Source</th></tr></thead><tbody>
-<tr><td>tp1_dp8</td><td>3</td><td>194.4<br><small>194.1–194.7</small></td><td>24.4</td><td>5.21</td><td>3.94</td><td>E722@l40s</td></tr>
-<tr><td>tp2_dp4</td><td>3</td><td>146.2<br><small>145.4–146.9</small></td><td>11.1</td><td>6.91</td><td>5.10</td><td>E723@l40s</td></tr>
-<tr><td>tp4_dp2</td><td>3</td><td>102.4<br><small>101.3–104.1</small></td><td>13.4</td><td>9.93</td><td>7.11</td><td>E724@l40s</td></tr>
-<tr><td>tp8</td><td>3</td><td>98.4<br><small>98.1–99.0</small></td><td>15.1</td><td>10.27</td><td>7.64</td><td>E725@l40s</td></tr>
-</tbody></table></div>
-<h3>TinyLlama-1.1B-Chat-v1.0 · L40S · prompt 128 · concurrency 8</h3>
-<div class="live-chart" role="group" aria-label="Output throughput by layout">
-<div class="live-bar-row"><span>tp1_dp8</span><div class="live-bar-track"><div class="live-bar" style="width:100.00%"></div></div><strong>1,529.7 tok/s</strong></div>
-<div class="live-bar-row"><span>tp2_dp4</span><div class="live-bar-track"><div class="live-bar" style="width:72.82%"></div></div><strong>1,113.9 tok/s</strong></div>
-<div class="live-bar-row"><span>tp4_dp2</span><div class="live-bar-track"><div class="live-bar" style="width:50.22%"></div></div><strong>768.1 tok/s</strong></div>
-<div class="live-bar-row"><span>tp8</span><div class="live-bar-track"><div class="live-bar" style="width:47.54%"></div></div><strong>727.2 tok/s</strong></div>
-</div><div class="table-wrap"><table class="nerd-table"><thead><tr><th>Layout</th><th>Trials</th><th>Output tok/s</th><th>p95 TTFT (ms)</th><th>p95 time/token (ms)</th><th>J/output token</th><th>Source</th></tr></thead><tbody>
-<tr><td>tp1_dp8</td><td>3</td><td>1,529.7<br><small>1,519.7–1,541.3</small></td><td>7.6</td><td>5.21</td><td>1.00</td><td>E726@l40s</td></tr>
-<tr><td>tp2_dp4</td><td>3</td><td>1,113.9<br><small>1,110.5–1,120.1</small></td><td>10.4</td><td>7.18</td><td>0.87</td><td>E727@l40s</td></tr>
-<tr><td>tp4_dp2</td><td>3</td><td>768.1<br><small>766.3–770.8</small></td><td>16.2</td><td>10.47</td><td>1.04</td><td>E728@l40s</td></tr>
-<tr><td>tp8</td><td>3</td><td>727.2<br><small>721.3–732.1</small></td><td>28.2</td><td>11.08</td><td>1.04</td><td>E729@l40s</td></tr>
-</tbody></table></div>
-<h3>TinyLlama-1.1B-Chat-v1.0 · L40S · prompt 1280 · concurrency 1</h3>
-<div class="live-chart" role="group" aria-label="Output throughput by layout">
-<div class="live-bar-row"><span>tp1_dp8</span><div class="live-bar-track"><div class="live-bar" style="width:100.00%"></div></div><strong>187.5 tok/s</strong></div>
-<div class="live-bar-row"><span>tp2_dp4</span><div class="live-bar-track"><div class="live-bar" style="width:75.69%"></div></div><strong>141.9 tok/s</strong></div>
-<div class="live-bar-row"><span>tp4_dp2</span><div class="live-bar-track"><div class="live-bar" style="width:53.60%"></div></div><strong>100.5 tok/s</strong></div>
-<div class="live-bar-row"><span>tp8</span><div class="live-bar-track"><div class="live-bar" style="width:51.79%"></div></div><strong>97.1 tok/s</strong></div>
-</div><div class="table-wrap"><table class="nerd-table"><thead><tr><th>Layout</th><th>Trials</th><th>Output tok/s</th><th>p95 TTFT (ms)</th><th>p95 time/token (ms)</th><th>J/output token</th><th>Source</th></tr></thead><tbody>
-<tr><td>tp1_dp8</td><td>3</td><td>187.5<br><small>186.6–188.1</small></td><td>26.9</td><td>5.30</td><td>4.28</td><td>E730@l40s</td></tr>
-<tr><td>tp2_dp4</td><td>3</td><td>141.9<br><small>141.7–142.2</small></td><td>24.8</td><td>6.98</td><td>5.37</td><td>E731@l40s</td></tr>
-<tr><td>tp4_dp2</td><td>3</td><td>100.5<br><small>100.0–101.0</small></td><td>32.0</td><td>9.90</td><td>7.32</td><td>E732@l40s</td></tr>
-<tr><td>tp8</td><td>3</td><td>97.1<br><small>96.1–98.1</small></td><td>33.9</td><td>10.27</td><td>7.80</td><td>E733@l40s</td></tr>
-</tbody></table></div>
-<h3>TinyLlama-1.1B-Chat-v1.0 · L40S · prompt 1280 · concurrency 8</h3>
-<div class="live-chart" role="group" aria-label="Output throughput by layout">
-<div class="live-bar-row"><span>tp1_dp8</span><div class="live-bar-track"><div class="live-bar" style="width:100.00%"></div></div><strong>1,474.1 tok/s</strong></div>
-<div class="live-bar-row"><span>tp2_dp4</span><div class="live-bar-track"><div class="live-bar" style="width:71.96%"></div></div><strong>1,060.7 tok/s</strong></div>
-<div class="live-bar-row"><span>tp4_dp2</span><div class="live-bar-track"><div class="live-bar" style="width:48.44%"></div></div><strong>714.1 tok/s</strong></div>
-<div class="live-bar-row"><span>tp8</span><div class="live-bar-track"><div class="live-bar" style="width:42.30%"></div></div><strong>623.5 tok/s</strong></div>
-</div><div class="table-wrap"><table class="nerd-table"><thead><tr><th>Layout</th><th>Trials</th><th>Output tok/s</th><th>p95 TTFT (ms)</th><th>p95 time/token (ms)</th><th>J/output token</th><th>Source</th></tr></thead><tbody>
-<tr><td>tp1_dp8</td><td>3</td><td>1,474.1<br><small>1,464.0–1,481.2</small></td><td>18.8</td><td>5.32</td><td>1.05</td><td>E734@l40s</td></tr>
-<tr><td>tp2_dp4</td><td>3</td><td>1,060.7<br><small>1,055.8–1,068.8</small></td><td>45.6</td><td>7.42</td><td>0.94</td><td>E735@l40s</td></tr>
-<tr><td>tp4_dp2</td><td>3</td><td>714.1<br><small>712.3–715.9</small></td><td>116.4</td><td>11.05</td><td>1.15</td><td>E736@l40s</td></tr>
-<tr><td>tp8</td><td>3</td><td>623.5<br><small>617.4–630.4</small></td><td>249.6</td><td>12.67</td><td>1.26</td><td>E737@l40s</td></tr>
-</tbody></table></div>
-<h3>How to interpret these findings</h3>
-<p>Qwen7B TP2 and TP4 had nearly equal throughput at concurrency 1; TP2 used less energy per output token. At concurrency 8, TP2 led throughput while TP4 used less energy per output token. Only collected performance conditions appear here; configured follow-ups remain in the catalog.</p>
-<p>Energy is integrated across all allocated GPUs over the measured region. Memory totals reflect vLLM cache reservation and do not isolate model weights. Request timestamps exclude HTTP/network and some parent-router overhead. Synthetic closed rounds do not establish production queueing or an SLO. No direct NVLink/PCIe traffic attribution is available. Cross-platform comparisons require matched controls.</p>
-</section><!-- LIVE_INFERENCE_END -->
-
   <section id="scaling">
-    <p class="section-kicker">Question 1</p>
+    <p class="section-kicker">Training &middot; more chips</p>
     <h2>Does adding more chips actually help?</h2>
     <p class="section-intro">
       In theory, using 4 chips instead of 1 should make a job 4 times faster. In practice, the chips
@@ -798,7 +778,7 @@
       <a class="see-stats" href="#nerd-scaling">Supporting evidence: exact speedups, sample sizes &amp; source runs &rarr;</a>
     </div>
     <div class="finding-card">
-      <p class="headline"><span class="tag">New evidence</span> On the main chip, the larger chat model scales just as well as the others</p>
+      <p class="headline"><span class="tag">Finding</span> On the main chip, the larger chat model scales just as well as the others</p>
       <p>
         Holding TinyLlama's per-chip workload constant while adding chips &mdash; so the job grows with
         the hardware, the same easier test as above &mdash; stayed 92% efficient at both 2 and 4 chips
@@ -814,28 +794,33 @@
   </section>
 
   <section id="scaling-deep-dive">
-    <p class="section-kicker">Scaling deep dive</p>
+    <p class="section-kicker">Training &middot; what limits scaling</p>
     <h2>When does adding chips work, and when does it fail?</h2>
     <p class="section-intro">
-      The earlier scaling studies showed the outcome. This controlled L40S study tests the cause:
-      how much useful computation each chip performs before all chips must stop and exchange
-      gradients. The model, batch per chip, sequence length, precision and DDP implementation stay
-      fixed while only the number of gradient-accumulation steps changes.
+      The earlier scaling studies showed the outcome. The scaling deep dive tests several possible
+      explanations: synchronization frequency, work per chip, model size, communication settings,
+      training stack, GPU placement, input balance and precision. The table summarises the collected
+      evidence across S1&ndash;S8. The chart and findings below focus on S1: within each matched
+      comparison, model, batch per chip, sequence length, precision and DDP settings stay fixed
+      while gradient accumulation changes.
     </p>
     <div class="nerd-table-wrap" style="margin-bottom: 22px;"><table class="nerd-table">
       <thead><tr><th>Lever</th><th>What we change</th><th>What we compare it against</th><th>Why it may influence scaling</th><th>Current evidence</th></tr></thead>
       <tbody>
         <tr><td>Synchronization frequency</td><td>Gradient accumulation: 1, 2, 4 or 8 micro-batches per exchange</td><td>Same model, batch/GPU, sequence length, precision and DDP settings</td><td>More computation is performed for each gradient exchange</td><td><b>Completed on L40S.</b> Accumulation 8 raised 8-GPU efficiency from 88% to 97% for GPT-2, 79% to 95% for DistilBERT and 54% to 87% for TinyLlama.</td></tr>
         <tr><td>Work allocation</td><td>Weak scaling versus a fixed global batch</td><td>Growing total work with GPU count versus splitting one fixed job</td><td>Fixed work leaves less computation on each GPU as more GPUs are added</td><td><b>Completed for GPT-2.</b> Fixed-batch efficiency fell to 82% at 8 GPUs even though matched weak scaling reached 97%.</td></tr>
-        <tr><td>Batch/sequence split</td><td>Different micro-batch and sequence-length combinations at the same tokens/GPU</td><td>Equal token counts per GPU and the same model</td><td>Attention cost and kernel shape may matter beyond token count alone</td><td>Designed as S2; results not collected yet.</td></tr>
-        <tr><td>Model size</td><td>66M to 1.1B parameters at matched work/GPU</td><td>Same token workload, precision and scaling method</td><td>Larger models exchange more gradient data</td><td>S1 already shows different sensitivity across three models; the controlled size-ladder S3 is pending.</td></tr>
-        <tr><td>Communication settings</td><td>DDP bucket size, bucket views, static graph and BF16 gradient compression</td><td>Default DDP at the same workload and GPU count</td><td>Changes when and how many gradient bytes are exchanged</td><td>Designed as S4; results not collected yet.</td></tr>
-        <tr><td>Training stack</td><td>DDP versus FSDP shard-grad and full-shard</td><td>Same inputs and per-GPU workload</td><td>Sharding saves memory but changes communication volume and pattern</td><td>Designed as S5; scaling curves not collected yet.</td></tr>
-        <tr><td>GPU placement/topology</td><td>Same-switch, same-socket and cross-socket GPU placement; P2P on/off</td><td>Same job on different L40S links</td><td>PCIe path and socket crossings can change communication latency</td><td>Designed as S6; current S1 placement records are unknown.</td></tr>
-        <tr><td>Input balance</td><td>Padded, bucketed, packed and variable-length real text</td><td>Fixed-length synthetic inputs</td><td>Uneven work makes faster ranks wait for the slowest rank</td><td>Designed as S7; results not collected yet.</td></tr>
-        <tr><td>Compute precision</td><td>FP32, BF16 and H100 FP8</td><td>Same workload and communication pattern</td><td>Faster compute can expose a larger communication bottleneck</td><td>Designed as S8; results not collected yet.</td></tr>
+        <tr><td>Batch/sequence split</td><td>Different micro-batch and sequence-length combinations at the same tokens/GPU</td><td>Equal token counts per GPU and the same model</td><td>Attention cost and kernel shape may matter beyond token count alone</td><td><b>S2 collected on L40S:</b> 72/72 conditions, 216 trials; H100 has 3 shared-control conditions. Shorter sequences helped GPT-2, while DistilBERT changed little. <a href="studies.html#s2-split">Study &amp; evidence &rarr;</a></td></tr>
+        <tr><td>Model size</td><td>66M to 1.1B parameters at matched work/GPU</td><td>Same token workload, precision and scaling method</td><td>Larger models exchange more gradient data</td><td><b>S3 collected on L40S:</b> 28/28 conditions, 84 trials; no H100 results in this block. Accumulation 4 improved 8-GPU efficiency by about 21&ndash;25 percentage points across the five models. <a href="studies.html#s3-model-size">Study &amp; evidence &rarr;</a></td></tr>
+        <tr><td>Communication settings</td><td>DDP bucket size, bucket views, static graph and BF16 gradient compression</td><td>Default DDP at the same workload and GPU count</td><td>Changes when and how many gradient bytes are exchanged</td><td><b>S4 collected:</b> L40S 54/55 conditions (162 trials); H100 13/37 (39 trials), including shared controls. On 8 L40S GPUs, TinyLlama gained 33.7% throughput with 100 MB buckets plus BF16 compression. H100 TinyLlama compression hurt throughput. <a href="studies.html#s4-ddp">Study &amp; evidence &rarr;</a></td></tr>
+        <tr><td>Training stack</td><td>DDP versus FSDP shard-grad and full-shard</td><td>Same inputs and per-GPU workload</td><td>Sharding saves memory but changes communication volume and pattern</td><td><b>S5 collected:</b> L40S 36/38 conditions (108 trials); H100 26/26 (78 trials), including shared controls. Per-layer FSDP grad-op sharding improved TinyLlama throughput by 113.6% over DDP at 8 L40S GPUs; wrapping strategy matters. <a href="studies.html#s5-stacks">Study &amp; evidence &rarr;</a></td></tr>
+        <tr><td>GPU placement/topology</td><td>Same-switch, same-socket and cross-socket GPU placement; P2P on/off</td><td>Same job on different L40S links</td><td>PCIe path and socket crossings can change communication latency</td><td><b>S6 partly complete:</b> L40S 32 complete conditions and 1 partial, including shared controls and recovery runs E796&ndash;E809; H100 has 4 shared controls. Most original placement effects were under 3%; the recovery set found a 12.1% TinyLlama slowdown with all-reduce Tree at 8 GPUs. <a href="studies.html#s6-topology">Study &amp; evidence &rarr;</a></td></tr>
+        <tr><td>Input balance</td><td>Padded, bucketed, packed and variable-length real text</td><td>Fixed-length synthetic inputs</td><td>Uneven work makes faster ranks wait for the slowest rank</td><td><b>S7 collected on L40S:</b> 32/32 conditions, 96 trials; no H100 results in this block. Packing raised useful-token throughput by 7.9&times; for GPT-2 and 6.4&times; for TinyLlama at 8 GPUs, relative to padding-heavy controls. <a href="studies.html#s7-real-text">Study &amp; evidence &rarr;</a></td></tr>
+        <tr><td>Compute precision</td><td>H100 FP32 and Transformer Engine BF16/FP8; planned L40S precision sweep</td><td>Same workload and communication pattern</td><td>Faster compute can expose a larger communication bottleneck</td><td><b>S8 collected on H100:</b> 30/30 conditions, 90 trials, including shared controls. FP8 improved 4-GPU throughput by 21.1% for GPT-2 and 2.7% for DistilBERT versus Transformer Engine BF16. The dedicated L40S precision sweep remains uncollected; its 8 completed entries are shared controls. <a href="studies.html#s8-precision">Study &amp; evidence &rarr;</a></td></tr>
       </tbody>
     </table></div>
+    <p class="note">Coverage above follows each study&rsquo;s condition set, including shared controls;
+      counts overlap between studies and should not be added together. Partial and missing conditions
+      remain distinct from completed comparisons. <a href="studies.html">Current findings &amp; full condition tables &rarr;</a></p>
     <div class="chart-panel" style="margin-bottom: 22px;">
       <p class="chart-title">Eight-chip scaling efficiency before and after communication is amortized</p>
       <p class="chart-sub">L40S, default DDP &middot; 100% is perfect weak scaling &middot; higher is better</p>
@@ -873,90 +858,8 @@
     </div>
   </section>
 
-  <section id="strategy">
-    <p class="section-kicker">Question 2</p>
-    <h2>What's the best way to split work across several chips?</h2>
-    <p class="section-intro">
-      There are a few different ways to divide an AI model across multiple chips. Think of it like
-      splitting a big printed report across several photocopiers: you can give every machine a full
-      copy (fast, but each one needs the whole document in front of it), or you can split the document
-      into sections and only hand each machine the pages it needs (slower to organise, but every
-      machine needs far less desk space).
-    </p>
-    <div class="chart-grid">
-      <div class="chart-panel">
-        <p class="chart-title">Processing speed, by method</p>
-        <p class="chart-sub">Text-generation model, 2 chips &middot; higher is better</p>
-        <div id="chartStrategySpeed"></div>
-      </div>
-      <div class="chart-panel">
-        <p class="chart-title">Memory used, by method</p>
-        <p class="chart-sub">Same test &middot; lower is better</p>
-        <div id="chartStrategyMemory"></div>
-      </div>
-    </div>
-    <div class="finding-card">
-      <p class="headline"><span class="tag">Finding</span> The "memory-smart" method was the safest default</p>
-      <p>
-        The full-copy method ("DDP") is the simplest and often fastest when memory isn't tight. But the
-        memory-smart method ("FSDP") matched or beat it on speed while using noticeably less memory in
-        almost every test we ran &mdash; for the text-classification model it was both 1.7% faster and used
-        10% less memory at the same time. The deepest memory-saving mode helped further only when memory
-        was genuinely the bottleneck, and it cost real speed to get there.
-      </p>
-      <p class="note">Based on 35 matched H100 comparisons across two model types and multiple chip counts.</p>
-      <a class="see-stats" href="#nerd-strategy">Supporting evidence: throughput &amp; memory by method &rarr;</a>
-    </div>
-    <div class="finding-card">
-      <p class="headline"><span class="tag">New evidence</span> Sharding also helped the larger TinyLlama model</p>
-      <p>
-        On two H100 chips, full-shard FSDP processed about 14% more training tokens per second
-        than full-copy DDP while using about 21% less GPU memory. The same direction held in
-        the four-H100 and eight-L40S paired tests. This is a within-platform comparison:
-        H100 used a batch of 8 per chip, L40S a batch of 2, so their absolute rates are not
-        a controlled head-to-head hardware result.
-      </p>
-      <p class="note">TinyLlama-1.1B, BF16, 1,024-token sequences; three completed trials per condition. Speed and memory do not establish equal training quality.</p>
-      <a class="see-stats" href="#nerd-tinyllama-strategy">Supporting evidence: all methods and GPU counts &rarr;</a>
-    </div>
-  </section>
-
-  <section id="precision">
-    <p class="section-kicker">Question 3</p>
-    <h2>Does it matter how precisely we store the numbers?</h2>
-    <p class="section-intro">
-      Every number inside an AI model can be stored with more or less precision &mdash; a bit like the
-      difference between a large, exact photo file and a compressed one. The compressed version is much
-      faster to move around and barely looks different, unless you compress it too far.
-    </p>
-    <div class="chart-grid">
-      <div class="chart-panel">
-        <p class="chart-title">Text-generation model &mdash; training speed</p>
-        <p class="chart-sub">Most exact &rarr; most compact number format &middot; speed multiplier vs. the most exact format</p>
-        <div id="chartPrecisionGpt2"></div>
-      </div>
-      <div class="chart-panel">
-        <p class="chart-title">Text-classification model &mdash; training speed</p>
-        <p class="chart-sub">Same comparison &middot; speed multiplier vs. the most exact format</p>
-        <div id="chartPrecisionDistilbert"></div>
-      </div>
-    </div>
-    <div class="finding-card">
-      <p class="headline"><span class="tag">Finding</span> Compressed number formats were the single biggest speed win we found</p>
-      <p>
-        Moving from the most exact number format to a more compact one made training 2.6&ndash;3.6&times;
-        faster for the text-generation model, and 4.7&ndash;5.3&times; faster for the text-classification
-        model &mdash; on the exact same chip, doing the exact same job. And in a direct head-to-head accuracy
-        check, the compact format got exactly the same number of answers right (98.4%) as the fully exact
-        one. This is the cheapest performance upgrade in the whole study: no new hardware required.
-      </p>
-      <p class="note">Based on 22 matched H100 precision comparisons per model. The most extreme compressed format for live serving (rather than training) is still being validated for two of the three models.</p>
-      <a class="see-stats" href="#nerd-precision">Supporting evidence: per-format throughput &amp; runtime &rarr;</a>
-    </div>
-  </section>
-
   <section id="communication">
-    <p class="section-kicker">Question 4</p>
+    <p class="section-kicker">Training &middot; why scaling falls short</p>
     <h2>Do the chips waste time talking to each other?</h2>
     <p class="section-intro">
       When several chips work on the same job, they periodically have to "check in" with each other to
@@ -991,37 +894,125 @@
     </div>
   </section>
 
-  <section id="hardware">
-    <p class="section-kicker">Question 5</p>
-    <h2>Premium chip or budget chip?</h2>
+  <section id="strategy">
+    <p class="section-kicker">Training &middot; splitting the model</p>
+    <h2>What's the best way to split work across several chips?</h2>
     <p class="section-intro">
-      The project compared NVIDIA's premium H100 chip against the more affordable L40S chip, using
-      identical jobs on both, so the comparison is apples-to-apples.
+      There are a few different ways to divide an AI model across multiple chips. Think of it like
+      splitting a big printed report across several photocopiers: you can give every machine a full
+      copy (fast, but each one needs the whole document in front of it), or you can split the document
+      into sections and only hand each machine the pages it needs (slower to organise, but every
+      machine needs far less desk space).
     </p>
     <div class="chart-grid">
-      <div class="chart-panel" style="grid-column: 1 / -1;">
-        <p class="chart-title">How much faster was the premium chip?</p>
-        <p class="chart-sub">Same job on both chips &middot; right of the line = premium chip faster &middot; left of the line = budget chip faster</p>
-        <div id="chartHardware"></div>
+      <div class="chart-panel">
+        <p class="chart-title">Processing speed, by method</p>
+        <p class="chart-sub">Text-generation model, 2 chips &middot; higher is better</p>
+        <div id="chartStrategySpeed"></div>
+      </div>
+      <div class="chart-panel">
+        <p class="chart-title">Memory used, by method</p>
+        <p class="chart-sub">Same test &middot; lower is better</p>
+        <div id="chartStrategyMemory"></div>
       </div>
     </div>
     <div class="finding-card">
-      <p class="headline"><span class="tag">Finding</span> The premium chip's advantage depends heavily on the job</p>
+      <p class="headline"><span class="tag">Finding</span> The "memory-smart" method was the safest default</p>
       <p>
-        For training, the premium chip was consistently and clearly faster &mdash; about 2.4&ndash;2.7 times.
-        But for simple, one-request-at-a-time use (generating text or classifying a sentence), the gap
-        nearly vanished: the two chips tied on text generation, and the budget chip was actually 14%
-        <em>faster</em> than the premium one for text classification in this test. If your main job is
-        training models, the premium chip earns its price. If your main job is serving individual
-        requests, the budget chip may be a smarter buy than its price tag suggests.
+        The full-copy method ("DDP") is the simplest and often fastest when memory isn't tight. But the
+        memory-smart method ("FSDP") matched or beat it on speed while using noticeably less memory in
+        almost every test we ran &mdash; for the text-classification model it was both 1.7% faster and used
+        10% less memory at the same time. The deepest memory-saving mode helped further only when memory
+        was genuinely the bottleneck, and it cost real speed to get there.
       </p>
-      <p class="note">Based on 4 matched training/inference pairs across two model types, both chips.</p>
-      <a class="see-stats" href="#nerd-hardware">Supporting evidence: raw H100 vs. L40S condition data &rarr;</a>
+      <p class="note">Based on 35 matched H100 comparisons across two model types and multiple chip counts.</p>
+      <a class="see-stats" href="#nerd-strategy">Supporting evidence: throughput &amp; memory by method &rarr;</a>
+    </div>
+    <div class="finding-card">
+      <p class="headline"><span class="tag">Finding</span> Sharding also helped the larger TinyLlama model</p>
+      <p>
+        On two H100 chips, full-shard FSDP processed about 14% more training tokens per second
+        than full-copy DDP while using about 21% less GPU memory. The same direction held in
+        the four-H100 and eight-L40S paired tests. This is a within-platform comparison:
+        H100 used a batch of 8 per chip, L40S a batch of 2, so their absolute rates are not
+        a controlled head-to-head hardware result.
+      </p>
+      <p class="note">TinyLlama-1.1B, BF16, 1,024-token sequences; three completed trials per condition. Speed and memory do not establish equal training quality.</p>
+      <a class="see-stats" href="#nerd-tinyllama-strategy">Supporting evidence: all methods and GPU counts &rarr;</a>
     </div>
   </section>
 
+  <section id="precision">
+    <p class="section-kicker">Training &middot; number formats</p>
+    <h2>Does it matter how precisely we store the numbers?</h2>
+    <p class="section-intro">
+      Every number inside an AI model can be stored with more or less precision &mdash; a bit like the
+      difference between a large, exact photo file and a compressed one. The compressed version is much
+      faster to move around and barely looks different, unless you compress it too far.
+    </p>
+    <div class="chart-grid">
+      <div class="chart-panel">
+        <p class="chart-title">Text-generation model &mdash; training speed</p>
+        <p class="chart-sub">Most exact &rarr; most compact number format &middot; speed multiplier vs. the most exact format</p>
+        <div id="chartPrecisionGpt2"></div>
+      </div>
+      <div class="chart-panel">
+        <p class="chart-title">Text-classification model &mdash; training speed</p>
+        <p class="chart-sub">Same comparison &middot; speed multiplier vs. the most exact format</p>
+        <div id="chartPrecisionDistilbert"></div>
+      </div>
+    </div>
+    <div class="finding-card">
+      <p class="headline"><span class="tag">Finding</span> Compressed number formats were the single biggest speed win we found</p>
+      <p>
+        Moving from the most exact number format to a more compact one made training 2.6&ndash;3.6&times;
+        faster for the text-generation model, and 4.7&ndash;5.3&times; faster for the text-classification
+        model &mdash; on the exact same chip, doing the exact same job. And in a direct head-to-head accuracy
+        check, the compact format got exactly the same number of answers right (98.4%) as the fully exact
+        one. This is the cheapest performance upgrade in the whole study: no new hardware required.
+      </p>
+      <p class="note">Based on 22 matched H100 precision comparisons per model. The most extreme compressed format for live serving (rather than training) is still being validated for two of the three models.</p>
+      <a class="see-stats" href="#nerd-precision">Supporting evidence: per-format throughput &amp; runtime &rarr;</a>
+    </div>
+  </section>
+
+  <section id="real-text">
+    <p class="section-kicker">Training &middot; real text</p>
+    <h2>How much of each batch is padding?</h2>
+    <p class="section-intro">
+      Most results above use synthetic batches where every sequence fills the whole window. Real text does not: most
+      paragraphs are short and uneven. A batch still needs equal-length rows, so the short ones get filled with padding
+      tokens the GPU processes but learns nothing from. These runs trained GPT-2 Small and TinyLlama-1.1B on WikiText-103
+      on 1&ndash;8 L40S GPUs, changing only how the text was batched, and counted <b>useful</b> (non-padding) tokens per second.
+    </p>
+    <div id="realText">
+      <div id="rtDiagram"></div>
+      <div class="finding-card"><p class="headline"><span class="tag">Finding</span> Pack your sequences: padding to the maximum wasted most of the work.</p>
+        <p>Padding every paragraph to 1,024 tokens meant 84&ndash;86% of processed tokens were padding. At 8 GPUs, packing delivered
+        <b>7.9&times;</b> (GPT-2 Small) and <b>6.4&times;</b> (TinyLlama) the useful tokens per second, and ran at about the speed of
+        synthetic fixed-length data (1.09&times; and 1.03&times;). Padding each batch only to its longest paragraph recovered far
+        less (2.1&times; and 1.2&times;). Grouping similar lengths cut padding further but, at 8 GPUs, added at most 3% more, because the GPU with
+        the longest batch became the straggler: the busiest GPU handled 2.2&ndash;2.3&times; the average tokens.</p></div>
+      <div id="rtCompare"></div>
+      <noscript><p>The interactive comparison needs JavaScript. All conditions are in <a href="studies.html#s7-real-text">Part 3</a>.</p></noscript>
+    </div>
+    <details class="nerd-block"><summary>How this was measured, and what it cannot show</summary>
+      <ul class="sl-notes">
+        <li>WikiText-103 at a pinned revision; GPT-2 Small 8 &times; 1,024 and TinyLlama-1.1B 4 &times; 1,024 tokens per GPU per step; L40S only. Each condition is 3 trials; intervals are refreshed from the cohort-aware trial summary.</li>
+        <li>Multiples and their 95% CIs are the same controlled contrasts (against padding to max, same GPU count) used in Part 3 and ranked in Part 4.</li>
+        <li>Throughput counts only real tokens. This is a throughput study, not a convergence study: packing lets attention cross paragraph boundaries unless masked per document, which can change what the model learns.</li>
+        <li>The large multiples reflect how short WikiText paragraphs are relative to 1,024 tokens; data closer to the window length would gain less.</li>
+        <li>Uneven batches make step times and trial-to-trial throughput vary, so several of these runs fail the step-jitter and trial-agreement health checks in Part 5. That is the effect being measured, not a fault in the runs.</li>
+      </ul>
+    </details>
+    <p class="xl-row"><span class="xl-k">Go further</span>
+      <a class="xl-link" href="studies.html#s7-real-text">S7 · Real text: every condition (Part 3) &rarr;</a>
+      <a class="xl-link" href="recommendations.html#mode=training&amp;size=1b&amp;hardware=l40s&amp;gpus=8&amp;priority=throughput">See it ranked against other levers (Part 4) &rarr;</a>
+      <a class="xl-link" href="diagnostics.html#study=s7-real-text">Hardware diagnostics for these runs (Part 5) &rarr;</a></p>
+  </section>
+
   <section id="batching">
-    <p class="section-kicker">Question 6</p>
+    <p class="section-kicker">Serving &middot; many users at once</p>
     <h2>What's the best way to serve many people at once?</h2>
     <p class="section-intro">
       When a chip is answering requests (for example, generating text for users), it can either handle
@@ -1053,8 +1044,215 @@
     </div>
   </section>
 
+  <section id="inference-parallelization">
+    <p class="section-kicker">Serving &middot; several chips</p>
+    <h2>More chips per model, or more copies of the model?</h2>
+    <p class="section-intro">
+      Batching and compact number formats change how one copy of a model serves requests. The next choice is how to spend a
+      fixed set of GPUs: shard each copy across several of them (tensor parallelism, <b>TP</b>), or run more independent copies
+      (<b>replicas</b>) behind a load balancer. These runs keep the node's GPU budget fixed and change only that split, across
+      short and long prompts and 1&ndash;8 concurrent requests.
+    </p>
+    <div id="servingLayouts">
+      <div id="slDiagram"></div>
+      <div class="finding-card"><p class="headline"><span class="tag">Finding</span> Small models: more copies. A 7B model: shard a little, and choose by what you optimise.</p>
+        <p>For TinyLlama-1.1B, which fits on one GPU, single-GPU replicas gave the highest throughput at every measured load on both
+        H100 and L40S. They were not best at everything on L40S: two-GPU replicas gave a faster first token with one request in
+        flight, and used less energy per token with eight. For Qwen2.5-7B on eight L40S, two-way sharding (TP2 &times; 4) had the
+        highest or tied-highest throughput, while four-way sharding (TP4 &times; 2) used 22&ndash;28% less energy per token at
+        4&ndash;8 concurrent requests. Sharding across all GPUs in one engine was never best for throughput.</p></div>
+      <div class="sl-answers" id="slAnswers"></div>
+      <div id="slMatrix"></div>
+      <div class="sl-detail" id="slDetail" aria-live="polite"></div>
+      <noscript><p>The interactive comparison needs JavaScript. Every condition is listed in <a href="studies.html#qwen-layouts">Part 3</a>.</p></noscript>
+    </div>
+    <!-- LIVE_INFERENCE_START -->
+<details class="nerd-block" id="serving-conditions"><summary>Every serving condition: trial ranges and source runs</summary>
+<p>TP2 × DP4 means four replicas, each spread over two GPUs. All results below use BF16, 128 fixed output tokens and the recorded serving runtime. Acceptance trials are excluded. Values are means across independent trials; throughput ranges show minimum–maximum across trials. p95 values are means of within-trial percentiles.</p>
+<p><strong>Study design:</strong> the concurrency-two extension is a <strong>follow-up motivated by observed results</strong> (E763/E764 and E767/E768), distinct from the original experiment plan; only collected performance trials appear below. <a href="index.html">Browse every condition and its platform status →</a></p>
+<details class="inference-condition"><summary>Qwen2.5-7B-Instruct · L40S · prompt 128 · concurrency 8</summary>
+<div class="live-chart" role="group" aria-label="Output throughput by layout">
+<div class="live-bar-row" data-layout="tp1_dp8"><span>tp1_dp8</span><div class="live-bar-track"><div class="live-bar" style="width:61.65%"></div></div><strong>376.2 tok/s</strong></div>
+<div class="live-bar-row" data-layout="tp2_dp4"><span>tp2_dp4</span><div class="live-bar-track"><div class="live-bar" style="width:100.00%"></div></div><strong>610.3 tok/s</strong></div>
+<div class="live-bar-row" data-layout="tp4_dp2"><span>tp4_dp2</span><div class="live-bar-track"><div class="live-bar" style="width:96.16%"></div></div><strong>586.9 tok/s</strong></div>
+</div><div class="table-wrap"><table class="nerd-table"><thead><tr><th>Layout</th><th>Trials</th><th>Output tok/s</th><th>p95 TTFT (ms)</th><th>p95 time/token (ms)</th><th>J/output token</th><th>Source</th></tr></thead><tbody>
+<tr><td>tp1_dp8</td><td>3</td><td>376.2<br><small>376.2–376.3</small></td><td>29.0</td><td>21.20</td><td>5.60</td><td>E752@l40s</td></tr>
+<tr><td>tp2_dp4</td><td>3</td><td>610.3<br><small>609.5–610.7</small></td><td>24.5</td><td>13.02</td><td>2.83</td><td>E753@l40s</td></tr>
+<tr><td>tp4_dp2</td><td>3</td><td>586.9<br><small>582.8–590.0</small></td><td>35.0</td><td>13.59</td><td>2.03</td><td>E757@l40s</td></tr>
+</tbody></table></div></details>
+<details class="inference-condition"><summary>Qwen2.5-7B-Instruct · L40S · prompt 1280 · concurrency 1</summary>
+<div class="live-chart" role="group" aria-label="Output throughput by layout">
+<div class="live-bar-row" data-layout="tp1_dp8"><span>tp1_dp8</span><div class="live-bar-track"><div class="live-bar" style="width:59.91%"></div></div><strong>46.0 tok/s</strong></div>
+<div class="live-bar-row" data-layout="tp2_dp4"><span>tp2_dp4</span><div class="live-bar-track"><div class="live-bar" style="width:100.00%"></div></div><strong>76.7 tok/s</strong></div>
+<div class="live-bar-row" data-layout="tp4_dp2"><span>tp4_dp2</span><div class="live-bar-track"><div class="live-bar" style="width:99.45%"></div></div><strong>76.3 tok/s</strong></div>
+</div><div class="table-wrap"><table class="nerd-table"><thead><tr><th>Layout</th><th>Trials</th><th>Output tok/s</th><th>p95 TTFT (ms)</th><th>p95 time/token (ms)</th><th>J/output token</th><th>Source</th></tr></thead><tbody>
+<tr><td>tp1_dp8</td><td>3</td><td>46.0<br><small>46.0–46.0</small></td><td>91.8</td><td>21.28</td><td>17.75</td><td>E762@l40s</td></tr>
+<tr><td>tp2_dp4</td><td>3</td><td>76.7<br><small>76.7–76.8</small></td><td>71.8</td><td>12.60</td><td>12.07</td><td>E763@l40s</td></tr>
+<tr><td>tp4_dp2</td><td>3</td><td>76.3<br><small>76.2–76.5</small></td><td>72.8</td><td>12.85</td><td>13.00</td><td>E764@l40s</td></tr>
+</tbody></table></div></details>
+<details class="inference-condition"><summary>Qwen2.5-7B-Instruct · L40S · prompt 1280 · concurrency 2</summary>
+<div class="live-chart" role="group" aria-label="Output throughput by layout">
+<div class="live-bar-row" data-layout="tp2_dp4"><span>tp2_dp4</span><div class="live-bar-track"><div class="live-bar" style="width:99.63%"></div></div><strong>153.4 tok/s</strong></div>
+<div class="live-bar-row" data-layout="tp4_dp2"><span>tp4_dp2</span><div class="live-bar-track"><div class="live-bar" style="width:100.00%"></div></div><strong>153.9 tok/s</strong></div>
+</div><div class="table-wrap"><table class="nerd-table"><thead><tr><th>Layout</th><th>Trials</th><th>Output tok/s</th><th>p95 TTFT (ms)</th><th>p95 time/token (ms)</th><th>J/output token</th><th>Source</th></tr></thead><tbody>
+<tr><td>tp2_dp4</td><td>3</td><td>153.4<br><small>153.2–153.6</small></td><td>71.1</td><td>12.60</td><td>8.44</td><td>E771@l40s</td></tr>
+<tr><td>tp4_dp2</td><td>3</td><td>153.9<br><small>152.3–155.2</small></td><td>72.6</td><td>12.67</td><td>8.46</td><td>E772@l40s</td></tr>
+</tbody></table></div></details>
+<details class="inference-condition"><summary>Qwen2.5-7B-Instruct · L40S · prompt 1280 · concurrency 4</summary>
+<div class="live-chart" role="group" aria-label="Output throughput by layout">
+<div class="live-bar-row" data-layout="tp2_dp4"><span>tp2_dp4</span><div class="live-bar-track"><div class="live-bar" style="width:100.00%"></div></div><strong>306.5 tok/s</strong></div>
+<div class="live-bar-row" data-layout="tp4_dp2"><span>tp4_dp2</span><div class="live-bar-track"><div class="live-bar" style="width:91.87%"></div></div><strong>281.6 tok/s</strong></div>
+</div><div class="table-wrap"><table class="nerd-table"><thead><tr><th>Layout</th><th>Trials</th><th>Output tok/s</th><th>p95 TTFT (ms)</th><th>p95 time/token (ms)</th><th>J/output token</th><th>Source</th></tr></thead><tbody>
+<tr><td>tp2_dp4</td><td>3</td><td>306.5<br><small>306.0–307.1</small></td><td>71.7</td><td>12.60</td><td>6.10</td><td>E767@l40s</td></tr>
+<tr><td>tp4_dp2</td><td>3</td><td>281.6<br><small>281.5–281.8</small></td><td>142.1</td><td>13.87</td><td>4.38</td><td>E768@l40s</td></tr>
+</tbody></table></div></details>
+<details class="inference-condition"><summary>Qwen2.5-7B-Instruct · L40S · prompt 1280 · concurrency 8</summary>
+<div class="live-chart" role="group" aria-label="Output throughput by layout">
+<div class="live-bar-row" data-layout="tp1_dp8"><span>tp1_dp8</span><div class="live-bar-track"><div class="live-bar" style="width:64.78%"></div></div><strong>366.8 tok/s</strong></div>
+<div class="live-bar-row" data-layout="tp2_dp4"><span>tp2_dp4</span><div class="live-bar-track"><div class="live-bar" style="width:100.00%"></div></div><strong>566.2 tok/s</strong></div>
+<div class="live-bar-row" data-layout="tp4_dp2"><span>tp4_dp2</span><div class="live-bar-track"><div class="live-bar" style="width:92.26%"></div></div><strong>522.4 tok/s</strong></div>
+</div><div class="table-wrap"><table class="nerd-table"><thead><tr><th>Layout</th><th>Trials</th><th>Output tok/s</th><th>p95 TTFT (ms)</th><th>p95 time/token (ms)</th><th>J/output token</th><th>Source</th></tr></thead><tbody>
+<tr><td>tp1_dp8</td><td>3</td><td>366.8<br><small>366.6–366.9</small></td><td>92.4</td><td>21.26</td><td>5.85</td><td>E754@l40s</td></tr>
+<tr><td>tp2_dp4</td><td>3</td><td>566.2<br><small>565.6–567.1</small></td><td>142.1</td><td>13.66</td><td>3.14</td><td>E755@l40s</td></tr>
+<tr><td>tp4_dp2</td><td>3</td><td>522.4<br><small>517.0–526.7</small></td><td>282.1</td><td>14.89</td><td>2.43</td><td>E758@l40s</td></tr>
+</tbody></table></div></details>
+<details class="inference-condition"><summary>TinyLlama-1.1B-Chat-v1.0 · H100 · prompt 128 · concurrency 1</summary>
+<div class="live-chart" role="group" aria-label="Output throughput by layout">
+<div class="live-bar-row" data-layout="tp1_dp4"><span>tp1_dp4</span><div class="live-bar-track"><div class="live-bar" style="width:100.00%"></div></div><strong>170.9 tok/s</strong></div>
+<div class="live-bar-row" data-layout="tp2_dp2"><span>tp2_dp2</span><div class="live-bar-track"><div class="live-bar" style="width:76.45%"></div></div><strong>130.7 tok/s</strong></div>
+<div class="live-bar-row" data-layout="tp4"><span>tp4</span><div class="live-bar-track"><div class="live-bar" style="width:78.33%"></div></div><strong>133.9 tok/s</strong></div>
+</div><div class="table-wrap"><table class="nerd-table"><thead><tr><th>Layout</th><th>Trials</th><th>Output tok/s</th><th>p95 TTFT (ms)</th><th>p95 time/token (ms)</th><th>J/output token</th><th>Source</th></tr></thead><tbody>
+<tr><td>tp1_dp4</td><td>3</td><td>170.9<br><small>169.3–171.8</small></td><td>9.9</td><td>5.87</td><td>3.02</td><td>E738@h100</td></tr>
+<tr><td>tp2_dp2</td><td>3</td><td>130.7<br><small>129.1–131.6</small></td><td>11.8</td><td>7.73</td><td>3.98</td><td>E739@h100</td></tr>
+<tr><td>tp4</td><td>3</td><td>133.9<br><small>132.4–134.9</small></td><td>12.0</td><td>7.46</td><td>4.70</td><td>E740@h100</td></tr>
+</tbody></table></div></details>
+<details class="inference-condition"><summary>TinyLlama-1.1B-Chat-v1.0 · H100 · prompt 128 · concurrency 8</summary>
+<div class="live-chart" role="group" aria-label="Output throughput by layout">
+<div class="live-bar-row" data-layout="tp1_dp4"><span>tp1_dp4</span><div class="live-bar-track"><div class="live-bar" style="width:100.00%"></div></div><strong>1,171.5 tok/s</strong></div>
+<div class="live-bar-row" data-layout="tp2_dp2"><span>tp2_dp2</span><div class="live-bar-track"><div class="live-bar" style="width:82.44%"></div></div><strong>965.8 tok/s</strong></div>
+<div class="live-bar-row" data-layout="tp4"><span>tp4</span><div class="live-bar-track"><div class="live-bar" style="width:80.26%"></div></div><strong>940.2 tok/s</strong></div>
+</div><div class="table-wrap"><table class="nerd-table"><thead><tr><th>Layout</th><th>Trials</th><th>Output tok/s</th><th>p95 TTFT (ms)</th><th>p95 time/token (ms)</th><th>J/output token</th><th>Source</th></tr></thead><tbody>
+<tr><td>tp1_dp4</td><td>3</td><td>1,171.5<br><small>1,165.5–1,176.4</small></td><td>9.8</td><td>6.82</td><td>0.56</td><td>E741@h100</td></tr>
+<tr><td>tp2_dp2</td><td>3</td><td>965.8<br><small>961.4–970.0</small></td><td>12.3</td><td>8.29</td><td>0.61</td><td>E742@h100</td></tr>
+<tr><td>tp4</td><td>3</td><td>940.2<br><small>935.9–945.6</small></td><td>12.9</td><td>8.54</td><td>0.67</td><td>E743@h100</td></tr>
+</tbody></table></div></details>
+<details class="inference-condition"><summary>TinyLlama-1.1B-Chat-v1.0 · H100 · prompt 1280 · concurrency 1</summary>
+<div class="live-chart" role="group" aria-label="Output throughput by layout">
+<div class="live-bar-row" data-layout="tp1_dp4"><span>tp1_dp4</span><div class="live-bar-track"><div class="live-bar" style="width:100.00%"></div></div><strong>167.2 tok/s</strong></div>
+<div class="live-bar-row" data-layout="tp2_dp2"><span>tp2_dp2</span><div class="live-bar-track"><div class="live-bar" style="width:77.29%"></div></div><strong>129.2 tok/s</strong></div>
+<div class="live-bar-row" data-layout="tp4"><span>tp4</span><div class="live-bar-track"><div class="live-bar" style="width:79.06%"></div></div><strong>132.2 tok/s</strong></div>
+</div><div class="table-wrap"><table class="nerd-table"><thead><tr><th>Layout</th><th>Trials</th><th>Output tok/s</th><th>p95 TTFT (ms)</th><th>p95 time/token (ms)</th><th>J/output token</th><th>Source</th></tr></thead><tbody>
+<tr><td>tp1_dp4</td><td>3</td><td>167.2<br><small>166.8–168.1</small></td><td>10.3</td><td>6.01</td><td>3.11</td><td>E744@h100</td></tr>
+<tr><td>tp2_dp2</td><td>3</td><td>129.2<br><small>128.9–129.7</small></td><td>12.0</td><td>7.79</td><td>4.08</td><td>E745@h100</td></tr>
+<tr><td>tp4</td><td>3</td><td>132.2<br><small>131.0–132.9</small></td><td>12.2</td><td>7.55</td><td>4.81</td><td>E746@h100</td></tr>
+</tbody></table></div></details>
+<details class="inference-condition"><summary>TinyLlama-1.1B-Chat-v1.0 · H100 · prompt 1280 · concurrency 8</summary>
+<div class="live-chart" role="group" aria-label="Output throughput by layout">
+<div class="live-bar-row" data-layout="tp1_dp4"><span>tp1_dp4</span><div class="live-bar-track"><div class="live-bar" style="width:100.00%"></div></div><strong>1,132.4 tok/s</strong></div>
+<div class="live-bar-row" data-layout="tp2_dp2"><span>tp2_dp2</span><div class="live-bar-track"><div class="live-bar" style="width:81.34%"></div></div><strong>921.0 tok/s</strong></div>
+<div class="live-bar-row" data-layout="tp4"><span>tp4</span><div class="live-bar-track"><div class="live-bar" style="width:76.96%"></div></div><strong>871.5 tok/s</strong></div>
+</div><div class="table-wrap"><table class="nerd-table"><thead><tr><th>Layout</th><th>Trials</th><th>Output tok/s</th><th>p95 TTFT (ms)</th><th>p95 time/token (ms)</th><th>J/output token</th><th>Source</th></tr></thead><tbody>
+<tr><td>tp1_dp4</td><td>3</td><td>1,132.4<br><small>1,122.9–1,141.2</small></td><td>18.4</td><td>7.05</td><td>0.61</td><td>E747@h100</td></tr>
+<tr><td>tp2_dp2</td><td>3</td><td>921.0<br><small>906.7–938.8</small></td><td>41.6</td><td>8.65</td><td>0.68</td><td>E748@h100</td></tr>
+<tr><td>tp4</td><td>3</td><td>871.5<br><small>868.3–875.3</small></td><td>82.1</td><td>9.14</td><td>0.76</td><td>E749@h100</td></tr>
+</tbody></table></div></details>
+<details class="inference-condition"><summary>TinyLlama-1.1B-Chat-v1.0 · L40S · prompt 128 · concurrency 1</summary>
+<div class="live-chart" role="group" aria-label="Output throughput by layout">
+<div class="live-bar-row" data-layout="tp1_dp8"><span>tp1_dp8</span><div class="live-bar-track"><div class="live-bar" style="width:100.00%"></div></div><strong>194.4 tok/s</strong></div>
+<div class="live-bar-row" data-layout="tp2_dp4"><span>tp2_dp4</span><div class="live-bar-track"><div class="live-bar" style="width:75.18%"></div></div><strong>146.2 tok/s</strong></div>
+<div class="live-bar-row" data-layout="tp4_dp2"><span>tp4_dp2</span><div class="live-bar-track"><div class="live-bar" style="width:52.67%"></div></div><strong>102.4 tok/s</strong></div>
+<div class="live-bar-row" data-layout="tp8"><span>tp8</span><div class="live-bar-track"><div class="live-bar" style="width:50.62%"></div></div><strong>98.4 tok/s</strong></div>
+</div><div class="table-wrap"><table class="nerd-table"><thead><tr><th>Layout</th><th>Trials</th><th>Output tok/s</th><th>p95 TTFT (ms)</th><th>p95 time/token (ms)</th><th>J/output token</th><th>Source</th></tr></thead><tbody>
+<tr><td>tp1_dp8</td><td>3</td><td>194.4<br><small>194.1–194.7</small></td><td>24.4</td><td>5.21</td><td>3.94</td><td>E722@l40s</td></tr>
+<tr><td>tp2_dp4</td><td>3</td><td>146.2<br><small>145.4–146.9</small></td><td>11.1</td><td>6.91</td><td>5.10</td><td>E723@l40s</td></tr>
+<tr><td>tp4_dp2</td><td>3</td><td>102.4<br><small>101.3–104.1</small></td><td>13.4</td><td>9.93</td><td>7.11</td><td>E724@l40s</td></tr>
+<tr><td>tp8</td><td>3</td><td>98.4<br><small>98.1–99.0</small></td><td>15.1</td><td>10.27</td><td>7.64</td><td>E725@l40s</td></tr>
+</tbody></table></div></details>
+<details class="inference-condition"><summary>TinyLlama-1.1B-Chat-v1.0 · L40S · prompt 128 · concurrency 8</summary>
+<div class="live-chart" role="group" aria-label="Output throughput by layout">
+<div class="live-bar-row" data-layout="tp1_dp8"><span>tp1_dp8</span><div class="live-bar-track"><div class="live-bar" style="width:100.00%"></div></div><strong>1,529.7 tok/s</strong></div>
+<div class="live-bar-row" data-layout="tp2_dp4"><span>tp2_dp4</span><div class="live-bar-track"><div class="live-bar" style="width:72.82%"></div></div><strong>1,113.9 tok/s</strong></div>
+<div class="live-bar-row" data-layout="tp4_dp2"><span>tp4_dp2</span><div class="live-bar-track"><div class="live-bar" style="width:50.22%"></div></div><strong>768.1 tok/s</strong></div>
+<div class="live-bar-row" data-layout="tp8"><span>tp8</span><div class="live-bar-track"><div class="live-bar" style="width:47.54%"></div></div><strong>727.2 tok/s</strong></div>
+</div><div class="table-wrap"><table class="nerd-table"><thead><tr><th>Layout</th><th>Trials</th><th>Output tok/s</th><th>p95 TTFT (ms)</th><th>p95 time/token (ms)</th><th>J/output token</th><th>Source</th></tr></thead><tbody>
+<tr><td>tp1_dp8</td><td>3</td><td>1,529.7<br><small>1,519.7–1,541.3</small></td><td>7.6</td><td>5.21</td><td>1.00</td><td>E726@l40s</td></tr>
+<tr><td>tp2_dp4</td><td>3</td><td>1,113.9<br><small>1,110.5–1,120.1</small></td><td>10.4</td><td>7.18</td><td>0.87</td><td>E727@l40s</td></tr>
+<tr><td>tp4_dp2</td><td>3</td><td>768.1<br><small>766.3–770.8</small></td><td>16.2</td><td>10.47</td><td>1.04</td><td>E728@l40s</td></tr>
+<tr><td>tp8</td><td>3</td><td>727.2<br><small>721.3–732.1</small></td><td>28.2</td><td>11.08</td><td>1.04</td><td>E729@l40s</td></tr>
+</tbody></table></div></details>
+<details class="inference-condition"><summary>TinyLlama-1.1B-Chat-v1.0 · L40S · prompt 1280 · concurrency 1</summary>
+<div class="live-chart" role="group" aria-label="Output throughput by layout">
+<div class="live-bar-row" data-layout="tp1_dp8"><span>tp1_dp8</span><div class="live-bar-track"><div class="live-bar" style="width:100.00%"></div></div><strong>187.5 tok/s</strong></div>
+<div class="live-bar-row" data-layout="tp2_dp4"><span>tp2_dp4</span><div class="live-bar-track"><div class="live-bar" style="width:75.69%"></div></div><strong>141.9 tok/s</strong></div>
+<div class="live-bar-row" data-layout="tp4_dp2"><span>tp4_dp2</span><div class="live-bar-track"><div class="live-bar" style="width:53.60%"></div></div><strong>100.5 tok/s</strong></div>
+<div class="live-bar-row" data-layout="tp8"><span>tp8</span><div class="live-bar-track"><div class="live-bar" style="width:51.79%"></div></div><strong>97.1 tok/s</strong></div>
+</div><div class="table-wrap"><table class="nerd-table"><thead><tr><th>Layout</th><th>Trials</th><th>Output tok/s</th><th>p95 TTFT (ms)</th><th>p95 time/token (ms)</th><th>J/output token</th><th>Source</th></tr></thead><tbody>
+<tr><td>tp1_dp8</td><td>3</td><td>187.5<br><small>186.6–188.1</small></td><td>26.9</td><td>5.30</td><td>4.28</td><td>E730@l40s</td></tr>
+<tr><td>tp2_dp4</td><td>3</td><td>141.9<br><small>141.7–142.2</small></td><td>24.8</td><td>6.98</td><td>5.37</td><td>E731@l40s</td></tr>
+<tr><td>tp4_dp2</td><td>3</td><td>100.5<br><small>100.0–101.0</small></td><td>32.0</td><td>9.90</td><td>7.32</td><td>E732@l40s</td></tr>
+<tr><td>tp8</td><td>3</td><td>97.1<br><small>96.1–98.1</small></td><td>33.9</td><td>10.27</td><td>7.80</td><td>E733@l40s</td></tr>
+</tbody></table></div></details>
+<details class="inference-condition"><summary>TinyLlama-1.1B-Chat-v1.0 · L40S · prompt 1280 · concurrency 8</summary>
+<div class="live-chart" role="group" aria-label="Output throughput by layout">
+<div class="live-bar-row" data-layout="tp1_dp8"><span>tp1_dp8</span><div class="live-bar-track"><div class="live-bar" style="width:100.00%"></div></div><strong>1,474.1 tok/s</strong></div>
+<div class="live-bar-row" data-layout="tp2_dp4"><span>tp2_dp4</span><div class="live-bar-track"><div class="live-bar" style="width:71.96%"></div></div><strong>1,060.7 tok/s</strong></div>
+<div class="live-bar-row" data-layout="tp4_dp2"><span>tp4_dp2</span><div class="live-bar-track"><div class="live-bar" style="width:48.44%"></div></div><strong>714.1 tok/s</strong></div>
+<div class="live-bar-row" data-layout="tp8"><span>tp8</span><div class="live-bar-track"><div class="live-bar" style="width:42.30%"></div></div><strong>623.5 tok/s</strong></div>
+</div><div class="table-wrap"><table class="nerd-table"><thead><tr><th>Layout</th><th>Trials</th><th>Output tok/s</th><th>p95 TTFT (ms)</th><th>p95 time/token (ms)</th><th>J/output token</th><th>Source</th></tr></thead><tbody>
+<tr><td>tp1_dp8</td><td>3</td><td>1,474.1<br><small>1,464.0–1,481.2</small></td><td>18.8</td><td>5.32</td><td>1.05</td><td>E734@l40s</td></tr>
+<tr><td>tp2_dp4</td><td>3</td><td>1,060.7<br><small>1,055.8–1,068.8</small></td><td>45.6</td><td>7.42</td><td>0.94</td><td>E735@l40s</td></tr>
+<tr><td>tp4_dp2</td><td>3</td><td>714.1<br><small>712.3–715.9</small></td><td>116.4</td><td>11.05</td><td>1.15</td><td>E736@l40s</td></tr>
+<tr><td>tp8</td><td>3</td><td>623.5<br><small>617.4–630.4</small></td><td>249.6</td><td>12.67</td><td>1.26</td><td>E737@l40s</td></tr>
+</tbody></table></div></details>
+<p>Energy is integrated across all allocated GPUs over the measured region. Memory totals reflect vLLM cache reservation and do not isolate model weights. Request timestamps exclude HTTP/network and some parent-router overhead. Synthetic closed rounds do not establish production queueing or an SLO. No direct NVLink/PCIe traffic attribution is available. Cross-platform comparisons require matched controls.</p>
+</details><!-- LIVE_INFERENCE_END -->
+    <details class="nerd-block"><summary>How this was measured, and what it cannot show</summary>
+      <ul class="sl-notes">
+        <li>BF16 weights, 128 fixed output tokens, vLLM serving runtime as recorded. Each value is the mean of 3 independent trials; p95 values are means of within-trial percentiles. Acceptance trials are excluded.</li>
+        <li>Leads under 3% are shown as ties: no confidence intervals are computed for these serving metrics.</li>
+        <li>Energy is integrated across all allocated GPUs over the measured region, so idle replicas count.</li>
+        <li>Request timings exclude HTTP/network and some router overhead. Synthetic closed-loop rounds do not establish production queueing or an SLO.</li>
+        <li>No NVLink/PCIe traffic attribution is available. H100 and L40S used different GPU counts (4 and 8) and are not directly comparable.</li>
+        <li>The concurrency-2 runs (E771/E772) are a follow-up motivated by E763/E764 and E767/E768, not part of the original plan.</li>
+      </ul>
+    </details>
+    <p class="xl-row"><span class="xl-k">Go further</span>
+      <a class="xl-link" href="studies.html#qwen-layouts">Qwen2.5-7B layouts, concurrency and goodput (Part 3) &rarr;</a>
+      <a class="xl-link" href="studies.html#tinyllama-layouts">TinyLlama layouts (Part 3) &rarr;</a>
+      <a class="xl-link" href="recommendations.html#mode=inference&amp;size=7b&amp;hardware=l40s&amp;gpus=8&amp;priority=throughput&amp;prompt=1280&amp;concurrency=8">Rank layouts for your own load (Part 4) &rarr;</a></p>
+  </section>
+
+  <section id="hardware">
+    <p class="section-kicker">Hardware &middot; premium or budget</p>
+    <h2>Premium chip or budget chip?</h2>
+    <p class="section-intro">
+      The project compared NVIDIA's premium H100 chip against the more affordable L40S chip, using
+      identical jobs on both, so the comparison is apples-to-apples.
+    </p>
+    <div class="chart-grid">
+      <div class="chart-panel" style="grid-column: 1 / -1;">
+        <p class="chart-title">How much faster was the premium chip?</p>
+        <p class="chart-sub">Same job on both chips &middot; right of the line = premium chip faster &middot; left of the line = budget chip faster</p>
+        <div id="chartHardware"></div>
+      </div>
+    </div>
+    <div class="finding-card">
+      <p class="headline"><span class="tag">Finding</span> The premium chip's advantage depends heavily on the job</p>
+      <p>
+        For training, the premium chip was consistently and clearly faster &mdash; about 2.4&ndash;2.7 times.
+        But for simple, one-request-at-a-time use (generating text or classifying a sentence), the gap
+        nearly vanished: the two chips tied on text generation, and the budget chip was actually 14%
+        <em>faster</em> than the premium one for text classification in this test. If your main job is
+        training models, the premium chip earns its price. If your main job is serving individual
+        requests, the budget chip may be a smarter buy than its price tag suggests.
+      </p>
+      <p class="note">Based on 4 matched training/inference pairs across two model types, both chips.</p>
+      <a class="see-stats" href="#nerd-hardware">Supporting evidence: raw H100 vs. L40S condition data &rarr;</a>
+    </div>
+  </section>
+
   <section id="power">
-    <p class="section-kicker">Question 7</p>
+    <p class="section-kicker">Energy</p>
     <h2>Does any of this actually save electricity?</h2>
     <p class="section-intro">
       Everything so far has been about speed. But chips draw real electricity while they work, and
@@ -1127,16 +1325,17 @@
       <p class="note">Power and energy figures use the project's "measured-region" telemetry &mdash; power draw sampled directly from the chip during the timed portion of each run, excluding warm-up and shutdown. Full-window estimates are excluded from these figures.</p>
       <a class="see-stats" href="#nerd-power">Supporting evidence: watts, joules &amp; energy-per-token by condition &rarr;</a>
     </div>
+    <p class="xl-row"><a class="xl-link" href="diagnostics.html">Per-condition power draw, temperatures and clocks are in Part 5 &middot; Diagnostics &rarr;</a></p>
   </section>
 
   <section id="lowbit">
-    <p class="section-kicker">Question 8</p>
+    <p class="section-kicker">A real 7B model</p>
     <h2>Does all this still hold for a real, modern 7-billion-parameter chat model?</h2>
     <p class="section-intro">
-      Everything above uses two small, easy-to-train models (GPT-2 Small and DistilBERT) so that many
-      conditions could be tested quickly. This section checks whether the same patterns hold up on a
+      Most of the comparisons above use small, quick-to-train models (DistilBERT, GPT-2 Small, TinyLlama) so that many
+      conditions could be tested. This section checks whether the same patterns hold up on a
       much larger, more realistic model &mdash; Qwen2.5-7B-Instruct, a real instruction-tuned chat model
-      &mdash; using a fresh batch of tests run on the premium chip (H100) on 26&ndash;27 September 2026.
+      &mdash; on the premium chip (H100).
     </p>
     <div class="chart-grid">
       <div class="chart-panel">
@@ -1211,7 +1410,7 @@
       <p class="note">Same runs as the finding above (E252&ndash;E255, 3 trials per condition).</p>
     </div>
     <div class="finding-card">
-      <p class="headline"><span class="tag">Still coming</span> A few things this new evidence doesn't cover yet</p>
+      <p class="headline"><span class="tag">Still coming</span> A few things these 7B runs don't cover yet</p>
       <p>
         A third splitting method (full-copy/DDP) was added to this same 7B comparison but still
         hasn't produced results, so it isn't included above. As with the rest of this report, the
@@ -1237,10 +1436,14 @@
       <div class="item"><b>Default to the "memory-smart" splitting method</b> when using several chips &mdash; it matched or beat the simple full-copy method while using less memory.</div>
       <div class="item"><b>Adding chips is worth it, up to 4.</b> Expect 91&ndash;97% of the theoretical benefit if the job scales with the hardware, a bit less (73%+) if you're splitting one fixed job.</div>
       <div class="item"><b>If you're serving many users, batch their requests.</b> 26.7&times; more throughput for roughly 20% more individual wait &mdash; a very good trade.</div>
+      <div class="item"><b>Compare replicas with model splitting.</b> TinyLlama favoured single-GPU replicas; Qwen7B benefited from TP2. Choose using matched model and demand conditions.</div>
       <div class="item"><b>Buy the premium chip for training; consider the budget chip for simple serving.</b> The price gap is easiest to justify when you're training, hardest to justify for light, one-at-a-time inference.</div>
       <div class="item"><b>Turn on the free, low-risk switches.</b> Pinned memory loading and activation checkpointing (memory-saving pause points) each cost little and help when you're memory-constrained.</div>
-      <div class="item"><b>Speed and electricity use moved together in every test.</b> Nothing measured here was a speed-for-energy trade-off &mdash; the faster option was consistently the more efficient one too, especially compact number formats and batching.</div>
+      <div class="item"><b>Check energy as well as speed.</b> Compact number formats and batching improved both speed and energy efficiency in those studies. The serving-layout comparisons show a trade-off: Qwen7B TP2 led throughput at concurrency 8, while TP4 used less energy per output token.</div>
     </div>
+    <p class="xl-row" style="margin-top:16px"><span class="xl-k">Go further</span>
+      <a class="xl-link" href="recommendations.html">Rank these levers for your own model, GPU and GPU count (Part 4) &rarr;</a>
+      <a class="xl-link" href="diagnostics.html">Check the hardware behind every result: power, memory, thermals (Part 5) &rarr;</a></p>
   </section>
 
   <section id="nerds">
@@ -1255,7 +1458,7 @@
     <p class="section-intro" style="margin-top:-12px;">
       Looking for the full picture rather than one finding at a time? Part 1&rsquo;s
       <a class="see-stats" href="index.html" style="margin-top:0;">Experiment Catalog &rarr;</a>
-      breaks all 276 planned conditions down by research theme and study, with filters and the exact
+      breaks the planned conditions down by research theme and study, with filters and the exact
       parameters each comparison varied vs. held constant &mdash; built for walking through progress
       study-by-study.
     </p>
@@ -1270,6 +1473,22 @@
       number of independently repeated runs a mean is drawn from &mdash; the pipeline requires at
       least 3 per condition for a Must-Have result.
     </div>
+
+<!-- LIVE_TRAINING_COVERAGE_START -->
+<div id="training-coverage" class="nerd-block">
+<h3>Training study coverage</h3>
+<p>The catalog now includes every checked-in E-number condition. Completed means at least one platform has the required collected trials; it does not imply both platforms are complete. Acceptance is displayed separately from performance evidence.</p>
+<div class="table-wrap"><table class="nerd-table"><thead><tr><th>L40S study</th><th>Completed conditions</th><th>Selected-cohort trials</th><th>Source range</th></tr></thead><tbody>
+<tr><td>Accumulation</td><td>48/48</td><td>144</td><td>E386@l40s–E433@l40s</td></tr>
+<tr><td>Sequence split</td><td>72/72</td><td>216</td><td>E434@l40s–E505@l40s</td></tr>
+<tr><td>Model size</td><td>28/28</td><td>84</td><td>E506@l40s–E533@l40s</td></tr>
+<tr><td>DDP communication</td><td>45/45</td><td>135</td><td>E534@l40s–E578@l40s</td></tr>
+<tr><td>Training stacks</td><td>29/29</td><td>87</td><td>E579@l40s–E607@l40s</td></tr>
+<tr><td>Placement/topology</td><td>13/22</td><td>40</td><td>E608@l40s–E633@l40s</td></tr>
+<tr><td>Real text</td><td>32/32</td><td>96</td><td>E638@l40s–E669@l40s</td></tr>
+<tr><td>Precision</td><td>0/28</td><td>0</td><td>E670@l40s–E697@l40s</td></tr>
+</tbody></table></div>
+</div><!-- LIVE_TRAINING_COVERAGE_END -->
 
     <div class="coverage-overview">
       <p class="chart-title">Evidence coverage, by test category</p>
@@ -1380,7 +1599,7 @@
     </div>
 
     <div class="nerd-block" id="nerd-tinyllama-weak-scaling">
-      <h3>RQ1 &middot; TinyLlama weak scaling (H100 1 October, L40S 30 September)</h3>
+      <h3>RQ1 &middot; TinyLlama weak scaling (H100 and L40S)</h3>
       <p class="nerd-method">
         Same-size-per-chip (weak) scaling: per-GPU batch held constant (8 on H100, 2 on L40S) while
         GPU count and global batch grow together. This pipeline's weak-scaling efficiency is baseline
@@ -1469,7 +1688,7 @@
     </div>
 
     <div class="nerd-block" id="nerd-tinyllama-strategy">
-      <h3>RQ2 &middot; TinyLlama strategy sweep (30 September)</h3>
+      <h3>RQ2 &middot; TinyLlama strategy sweep</h3>
       <p class="nerd-method">
         These two charts hold H100, two GPUs, BF16, model revision, 1,024-token sequence and
         per-GPU batch 8 constant while the distributed strategy changes. Higher throughput and
@@ -1759,15 +1978,13 @@
       <h3>How complete is this picture?</h3>
       <p>
         This page is built from <b id="coverageCompleted">747</b> completed tests out of
-        <b id="coverageTotal">817</b> planned (<b id="coveragePct">91%</b>), including the TinyLlama
-        strategy sweep and weak-scaling wave above.
+        <b id="coverageTotal">817</b> planned (<b id="coveragePct">91%</b>).
       </p>
       <div class="bar-wrap"><div class="bar-fill" id="coverageBar" style="width:0%"></div></div>
       <p>
         Coverage includes all checked-in conditions, including acceptance and configured follow-ups.
-        Completion on one platform does not imply completion on the other. The current inference
-        tables above use collected performance trials only; earlier research-question sections
-        retain the limitations and dates stated alongside them.
+        Completion on one platform does not imply completion on the other. Serving-layout tables use
+        collected performance trials only, and each section states its own limitations.
       </p>
     </div>
     <div class="prev-part">
@@ -1778,9 +1995,10 @@
       <a class="np-cta" href="index.html">&larr; Browse every experiment</a>
     </div>
     <p class="fineprint">
-      Generated from the project's own recorded test results (<code>results/analysis/</code>) as a
-      plain-language companion to the full technical dashboard. Figures are rounded for readability;
-      see the technical dashboard for exact values, confidence intervals, and every individual test.
+      A plain-language retelling of the project's results. The catalog data, drawer details and serving-condition
+      tables are refreshed from checksum-verified raw evidence by <code>scripts/update_dashboard_results.py</code>;
+      the real-text and serving-layout sections render from the same evidence as Parts 3&ndash;4. Figures are rounded
+      for readability; Part 3 has exact values and confidence intervals.
     </p>
   </div>
 </footer>
@@ -1797,7 +2015,28 @@
   <div class="drawer-body" id="drawerBody"></div>
 </aside>
 
+<script src="diagnostics-index.js"></script>
+<script src="links.js"></script>
+<script src="recommendations-data.js"></script>
+<script src="serving-layouts.js" defer></script>
+<script src="real-text.js" defer></script>
 <script>
+if ((typeof XL !== "undefined" && XL)) XL.injectStyles();
+
+/* Cross-page links (links.js): diagnostics per platform, catalog and studies. */
+function xlPlatformLinks(eid, plat) {
+  if (!(typeof XL !== "undefined" && XL) || !XL.hasDiag(eid, plat)) return "";
+  var f = XL.flags(eid, plat);
+  return '<p class="xl-row"><a class="xl-link" href="' + XL.diag(eid, plat) + '">Hardware diagnostics (power, memory, thermals) \u2192</a>' +
+    f.map(function (x) { return '<span class="xl-flag">\u26a0 ' + XL.esc(XL.checkLabel(x)) + "</span>"; }).join("") + "</p>";
+}
+function xlExpLinks(eid, opts) {
+  if (!(typeof XL !== "undefined" && XL)) return "";
+  var parts = [];
+  if (opts && opts.catalog) parts.push('<a class="xl-link" href="' + XL.catalog(eid) + '">Catalog entry \u2192</a>');
+  XL.studiesFor(eid).forEach(function (sid) { parts.push('<a class="xl-link" href="' + XL.study(sid) + '">' + XL.esc(XL.studyTitle(sid)) + "</a>"); });
+  return parts.length ? '<p class="xl-row"><span class="xl-k">See also</span>' + parts.join("") + "</p>" : "";
+}
 (function () {
   "use strict";
 
@@ -1885,8 +2124,9 @@
       if (pd.energy_status && pd.energy_status !== 'sufficient') {
         lines.push('<div class="exp-note">Energy telemetry: ' + pd.energy_status.replace(/_/g, ' ') + '</div>');
       }
-      lines.push('</div></div>');
+      lines.push('</div>' + xlPlatformLinks(base, plat) + '</div>');
     });
+    lines.push(xlExpLinks(base, { catalog: true }));
 
     lines.push('</div>');
     return lines.join('');
@@ -1948,6 +2188,34 @@
     return Number(n).toLocaleString(undefined, { maximumFractionDigits: decimals, minimumFractionDigits: decimals });
   }
 
+  var BAR_HEIGHT = 18;
+  var chartLayouts = new Map();
+  var chartResize = new ResizeObserver(function (entries) {
+    entries.forEach(function (entry) {
+      var layout = chartLayouts.get(entry.target);
+      if (layout && Math.abs(entry.contentRect.width - layout.width) > 1) layout.draw();
+    });
+  });
+  function trackChart(el, draw) {
+    chartLayouts.set(el, { width: el.clientWidth, draw: draw });
+    chartResize.observe(el);
+  }
+  // Shared identities across throughput, memory and energy comparisons.
+  function categoryColor(label, index, palette) {
+    if (/BF16 \(control\)/.test(label)) return palette[0];
+    if (/AWQ/.test(label)) return palette[1];
+    if (/GPTQ/.test(label)) return palette[2];
+    if (/NF4/.test(label)) return palette[3];
+    if (/FP32/.test(label)) return palette[0];
+    if (/FP16/.test(label)) return palette[1];
+    if (/BF16/.test(label)) return palette[2];
+    if (/FP8/.test(label)) return palette[3];
+    if (/DDP/.test(label)) return palette[0];
+    if (/FSDP/.test(label)) return palette[1];
+    if (/DeepSpeed|ZeRO/.test(label)) return palette[2];
+    return palette[index % palette.length];
+  }
+
   // ---- Generic grouped bar chart renderer -------------------------------
   // series: [{ name, color, values: [..] }]
   // categories: [labels]
@@ -1961,10 +2229,25 @@
     var refLine = opts.refLine; // { value, label }
     var maxOverride = opts.max;
 
-    var W = 560, marginL = 8, marginR = 8, marginT = 18, marginB = 30;
+    trackChart(el, function () { renderBars(containerId, opts); });
+    var palette = ['--blue', '--orange', '--aqua', '--violet', '--gold', '--pink'].map(css);
+    var categoryColors = categories.map(function (label, i) { return categoryColor(label, i, palette); });
+    var W = el.clientWidth || 560, marginL = 8, marginR = 80, marginT = 28, marginB = 16;
     var groupCount = categories.length;
     var seriesCount = series.length;
-    var rowH = seriesCount > 1 ? 96 : 74;
+    var labelWidth = Math.max(16, Math.floor((W - 16) / 6.5));
+    var labels = categories.map(function (cat) {
+      var lines = [''];
+      cat.split(' ').forEach(function (word) {
+        var last = lines.length - 1;
+        if (lines[last] && (lines[last] + ' ' + word).length > labelWidth) lines.push(word);
+        else lines[last] += (lines[last] ? ' ' : '') + word;
+      });
+      return lines;
+    });
+    var labelLines = Math.max.apply(null, labels.map(function (lines) { return lines.length; }));
+    marginT += (labelLines - 1) * 14;
+    var rowH = 26 + (labelLines - 1) * 14 + seriesCount * (BAR_HEIGHT + 6);
     var H = marginT + marginB + groupCount * rowH;
 
     var allVals = [];
@@ -1986,12 +2269,12 @@
       svg.push('<line class="grid-line" x1="' + gx + '" y1="' + marginT + '" x2="' + gx + '" y2="' + (H - marginB + 4) + '" />');
     }
 
-    var barH = seriesCount > 1 ? 16 : 22;
+    var barH = BAR_HEIGHT;
     var barGap = 6;
 
     categories.forEach(function (cat, gi) {
       var groupTop = marginT + gi * rowH;
-      var label = '<text class="bar-label" x="' + plotX + '" y="' + (groupTop - 4) + '">' + cat + '</text>';
+      var label = '<text class="bar-label">' + labels[gi].map(function (line, i) { return '<tspan x="' + plotX + '" y="' + (groupTop - 8 - (labels[gi].length - 1 - i) * 14) + '">' + line + '</tspan>'; }).join('') + '</text>';
       svg.push(label);
 
       series.forEach(function (s, si) {
@@ -1999,7 +2282,7 @@
         var v = s.values[gi];
         var x2 = xScale(v);
         var w = Math.max(2, x2 - plotX);
-        svg.push('<rect x="' + plotX + '" y="' + y + '" width="' + w + '" height="' + barH + '" rx="4" ry="4" fill="' + s.color + '"></rect>');
+        svg.push('<rect x="' + plotX + '" y="' + y + '" width="' + w + '" height="' + barH + '" rx="4" ry="4" fill="' + (seriesCount === 1 ? categoryColors[gi] : s.color) + '"><title>' + cat + ' · ' + s.name + ': ' + valueFmt(v) + '</title></rect>');
         var labelX = x2 + 6;
         svg.push('<text class="bar-value" x="' + labelX + '" y="' + (y + barH - 5) + '">' + valueFmt(v) + (s.suffix || '') + '</text>');
       });
@@ -2012,7 +2295,7 @@
     if (refLine) {
       var rx = xScale(refLine.value);
       svg.push('<line class="ref-line" x1="' + rx + '" y1="' + (marginT - 10) + '" x2="' + rx + '" y2="' + (H - marginB + 6) + '" />');
-      svg.push('<text class="ref-label" x="' + (rx + 4) + '" y="' + (marginT - 12) + '">' + refLine.label + '</text>');
+      svg.push('<text class="ref-label" x="' + (W - marginR) + '" y="' + 12 + '" text-anchor="end">' + refLine.label + '</text>');
     }
 
     svg.push('</svg>');
@@ -2027,7 +2310,7 @@
         item.innerHTML = '<span class="swatch" style="background:' + s.color + '"></span>' + s.name;
         legend.appendChild(item);
       });
-      el.parentElement.appendChild(legend);
+      el.appendChild(legend);
     }
   }
 
@@ -2040,13 +2323,14 @@
     var posColor = opts.posColor, negColor = opts.negColor;
     var posLabel = opts.posLabel, negLabel = opts.negLabel;
 
-    var W = 620, marginT = 18, marginB = 30;
+    trackChart(el, function () { renderDiverging(containerId, opts); });
+    var W = el.clientWidth || 560, marginT = 28, marginB = 18;
     var rowH = 54;
     var H = marginT + marginB + categories.length * rowH;
 
     var maxAbs = Math.max.apply(null, values.map(function (v) { return Math.abs(Math.log2(v)); })) * 1.35;
     var centerX = W / 2;
-    var halfW = (W / 2) - 170;
+    var halfW = Math.max(24, W / 2 - 100);
 
     function xFor(v) {
       var logv = Math.log2(v);
@@ -2063,14 +2347,14 @@
       var v = values[i];
       var x = xFor(v);
       var barY = y + 14;
-      var barH = 18;
+      var barH = BAR_HEIGHT;
       var isPos = v >= 1;
       var color = isPos ? posColor : negColor;
       var x1 = Math.min(centerX, x), x2 = Math.max(centerX, x);
       var w = Math.max(2, x2 - x1);
       svg.push('<text class="bar-label" x="' + centerX + '" y="' + (y + 8) + '" text-anchor="middle">' + cat + '</text>');
       svg.push('<rect x="' + x1 + '" y="' + barY + '" width="' + w + '" height="' + barH + '" rx="4" ry="4" fill="' + color + '"></rect>');
-      var label = fmt(v, 2) + '× ' + (isPos ? posLabel : negLabel);
+      var label = fmt(v, 2) + '×';
       var labelX = isPos ? x2 + 8 : x1 - 8;
       var anchor = isPos ? 'start' : 'end';
       svg.push('<text class="bar-value" x="' + labelX + '" y="' + (barY + barH - 4) + '" text-anchor="' + anchor + '">' + label + '</text>');
@@ -2084,7 +2368,7 @@
     legend.innerHTML =
       '<span class="item"><span class="swatch" style="background:' + posColor + '"></span>' + posLabel + '</span>' +
       '<span class="item"><span class="swatch" style="background:' + negColor + '"></span>' + negLabel + '</span>';
-    el.parentElement.appendChild(legend);
+    el.appendChild(legend);
   }
 
   // ---- Meter list (coverage by test category) ---------------------------
@@ -2245,7 +2529,6 @@
 
   function ready() {
     var BLUE = css('--blue'), ORANGE = css('--orange'), AQUA = css('--aqua'), VIOLET = css('--violet');
-    var SEQ = [css('--seq-1'), css('--seq-2'), css('--seq-3'), css('--seq-4')];
 
     // --- Scaling (RQ1) ----------------------------------------------------
     renderBars('chartScaling1', {
@@ -2294,12 +2577,6 @@
       valueFmt: function (v) { return fmt(v, 2) + '×'; },
       max: 4.3
     });
-    // recolor precision bars sequentially after render
-    (function paintSequential(id) {
-      var svg = document.getElementById(id).querySelector('svg');
-      var rects = svg.querySelectorAll('rect');
-      rects.forEach(function (r, i) { r.setAttribute('fill', SEQ[i] || SEQ[SEQ.length - 1]); });
-    })('chartPrecisionGpt2');
 
     renderBars('chartPrecisionDistilbert', {
       categories: ['Most exact (FP32)', 'Standard-compact (FP16)', 'Standard-compact (BF16)', 'Most compact (FP8)'],
@@ -2307,11 +2584,6 @@
       valueFmt: function (v) { return fmt(v, 2) + '×'; },
       max: 6.2
     });
-    (function paintSequential(id) {
-      var svg = document.getElementById(id).querySelector('svg');
-      var rects = svg.querySelectorAll('rect');
-      rects.forEach(function (r, i) { r.setAttribute('fill', SEQ[i] || SEQ[SEQ.length - 1]); });
-    })('chartPrecisionDistilbert');
 
     // --- Communication (RQ4) -----------------------------------------------
     renderBars('chartComms', {
@@ -2356,11 +2628,6 @@
       valueFmt: function (v) { return fmt(v, 2) + '×'; },
       max: 6.8
     });
-    (function paintSequential(id) {
-      var svg = document.getElementById(id).querySelector('svg');
-      var rects = svg.querySelectorAll('rect');
-      rects.forEach(function (r, i) { r.setAttribute('fill', SEQ[i] || SEQ[SEQ.length - 1]); });
-    })('chartEnergyGpt2');
 
     renderBars('chartEnergyDistilbert', {
       categories: ['Most exact (FP32)', 'Standard-compact (FP16)', 'Standard-compact (BF16)', 'Most compact (FP8)'],
@@ -2368,11 +2635,6 @@
       valueFmt: function (v) { return fmt(v, 2) + '×'; },
       max: 20
     });
-    (function paintSequential(id) {
-      var svg = document.getElementById(id).querySelector('svg');
-      var rects = svg.querySelectorAll('rect');
-      rects.forEach(function (r, i) { r.setAttribute('fill', SEQ[i] || SEQ[SEQ.length - 1]); });
-    })('chartEnergyDistilbert');
 
     renderBars('chartPowerScaling', {
       categories: ['1 chip', '2 chips', '4 chips'],
@@ -2400,22 +2662,12 @@
       series: [{ name: 'Tokens processed / second', color: BLUE, values: [756.85, 817.30, 845.42, 264.15] }],
       valueFmt: function (v) { return fmt(v, 0) + '/s'; },
     });
-    (function paintSequential(id) {
-      var svg = document.getElementById(id).querySelector('svg');
-      var rects = svg.querySelectorAll('rect');
-      rects.forEach(function (r, i) { r.setAttribute('fill', SEQ[i] || SEQ[SEQ.length - 1]); });
-    })('chartLowbitSpeed');
 
     renderBars('chartLowbitMemory', {
       categories: ['BF16 (control)', 'AWQ (4-bit)', 'GPTQ (4-bit)', 'NF4 (4-bit)'],
       series: [{ name: 'Peak GB of chip memory used', color: ORANGE, values: [15.70, 6.66, 6.68, 7.06] }],
       valueFmt: function (v) { return fmt(v, 1) + ' GB'; },
     });
-    (function paintSequential(id) {
-      var svg = document.getElementById(id).querySelector('svg');
-      var rects = svg.querySelectorAll('rect');
-      rects.forEach(function (r, i) { r.setAttribute('fill', SEQ[i] || SEQ[SEQ.length - 1]); });
-    })('chartLowbitMemory');
 
     renderBars('chartLongContext', {
       categories: ['~4,096-token prompt', '~6,144-token prompt', '~8,192-token prompt'],
@@ -2448,7 +2700,7 @@
       yMax: 110,
       series: [
         { name: 'H100 · batch 8 per chip', color: BLUE, points: [{ x: 1, y: 100 }, { x: 2, y: 92.386 }, { x: 4, y: 92.150 }] },
-        { name: 'L40S · batch 2 per chip', color: VIOLET, points: [{ x: 1, y: 100 }, { x: 2, y: 7.065 }, { x: 4, y: 32.545 }, { x: 8, y: 40.009 }] }
+        { name: 'L40S · batch 2 per chip', color: ORANGE, points: [{ x: 1, y: 100 }, { x: 2, y: 7.065 }, { x: 4, y: 32.545 }, { x: 8, y: 40.009 }] }
       ]
     });
 
@@ -2535,7 +2787,7 @@
     var total = 817, completed = 747, pct = Math.round((completed / total) * 100);
     document.getElementById('snapshotLine').textContent =
       'Snapshot generated from ' + completed + ' of ' + total + ' planned tests (' + pct + '% complete), ' +
-      'covering the checked-in experiment matrix; latest collected inference evidence is shown first.';
+      'covering the checked-in experiment matrix; findings are organised by research question and workload.';
     document.getElementById('coverageCompleted').textContent = completed;
     document.getElementById('coverageTotal').textContent = total;
     document.getElementById('coveragePct').textContent = pct + '%';

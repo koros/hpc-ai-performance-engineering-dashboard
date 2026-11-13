@@ -1,13 +1,10 @@
 # Research Dashboard — Experiment Catalog & plain-language summary
 
-This is the published dashboard. The catalog now covers every checked-in E-number
-condition, including the collected scaling deep dives and the TinyLlama/Qwen7B
-inference layout campaigns. Both pages embed their JSON for offline use.
-The current inference tables are regenerated from checksum-verified raw evidence;
-older research-question cards retain their explicitly dated historical scope.
-Canaries are listed in the catalog but excluded from performance findings.
-
-Two self-contained pages (no build step, no dependencies), meant to be read in order:
+This is the published dashboard: five self-contained pages with their data embedded or loaded from
+files alongside them (no server, no external services; open any page directly in a browser).
+The catalog covers every checked-in E-number condition. Canaries are listed in the catalog but
+excluded from performance findings. Every page links to the others, and experiment IDs link to the
+catalog, the study they belong to and their hardware diagnostics.
 
 1. **`index.html` — Part 1, Experiment Catalog.** The current full-matrix catalog,
    grouped by research theme and study, with filters and an automatic "held constant vs. varied"
@@ -25,14 +22,23 @@ Two self-contained pages (no build step, no dependencies), meant to be read in o
    strategy conditions are also synchronized from matching raw and processed trials. H100 and L40S
    use different per-GPU batch sizes (8 versus 2), so the study groups and findings do not pool them.
    This is the evidence base.
-2. **`analysis.html` — Part 2, Analysis & Findings.** Turns that evidence into a non-technical
-   story for readers who aren't familiar with GPUs, distributed training, or the RQ1–RQ7 framing
-   used elsewhere in this repo: six KPI numbers up top, then one short section per research
-   question, each with a plain-English explanation, a simple chart, and a one-paragraph finding.
-
-Both pages link to each other (a "Part 1 / Part 2" pill pair at the top of each, plus a
-next/previous-part card at the bottom). Open either directly in a browser — nothing needs to be
-served or built.
+2. **`analysis.html` — Part 2, Analysis & Findings.** A plain-language story in reading order:
+   training (more chips → what limits scaling → chips talking → splitting the model → number formats
+   → real text), serving (many users at once → several chips per model), hardware and energy, a
+   real 7B model, then practical takeaways and the supporting evidence. The real-text and
+   serving-layout sections render from the same evidence as Parts 3–4 (`real-text.js`,
+   `serving-layouts.js`); the serving section also holds the refreshed per-condition panel
+   (trial ranges and source runs) written by `scripts/update_dashboard_results.py`.
+3. **`studies.html` — Part 3, Detailed Studies.** 17 generated study summaries with questions,
+   findings, coverage, confidence intervals, charts, searchable evidence and 18 downloadable CSV
+   tables. It aggregates 409 conditions and 1,474 unique completed trials; overlapping studies never
+   multiply the headline trial count. Platform results remain separate.
+4. **`recommendations.html` — Part 4, Recommendations.** Ranks every measured lever by how close its
+   evidence is to the reader's workload (model size, GPU type and count; serving load for inference),
+   abstains when the closest evidence is out of range, and produces a copyable benchmark plan.
+5. **`diagnostics.html` — Part 5, Diagnostics.** Per-condition hardware telemetry (utilization, power,
+   memory, temperature, clocks, step-time spread, NCCL probe) with health checks reported as passed,
+   failed, not assessed or not applicable.
 
 ## Presentation approach
 
@@ -85,8 +91,10 @@ and also kept alongside as `experiments-data.json`.)
 ## Refreshing current results
 
 Run `make refresh-dashboard PYTHON=python` after pulling or collecting results.
-This updates both JSON files, the embedded catalog/details, current inference
-charts/tables and coverage counts. `make refresh` also runs this step, so the
+This updates both JSON files, the embedded catalog/details, the serving-condition panel,
+coverage counts, the studies (`scripts/build_dashboard_studies.py`), Part 4's
+`recommendations-data.js` (`scripts/build_dashboard_recommendations.py`) and Part 5's
+`diagnostics-data.js`/`diagnostics-index.js` (`scripts/build_dashboard_diagnostics.py`). `make refresh` also runs this step, so the
 publication workflow refreshes the dashboard before its checks and build.
 Use `make check-dashboard-data PYTHON=python` to detect stale generated content.
 
@@ -357,3 +365,65 @@ The plain-language section also includes a study-lever table showing what each d
 changes, what it compares against, why the parameter could affect scaling, and whether evidence has
 been collected. It explicitly separates the completed S1 synchronization/work-allocation results
 from the still-pending S2-S8 levers.
+
+## Current study aggregation
+
+`make refresh-dashboard PYTHON=python3` now also runs
+`scripts/build_dashboard_studies.py`. `make check-dashboard-data PYTHON=python3`
+checks both the existing catalog/inference refresh and the generated studies.
+The publication artifact includes `studies.html` and `studies-data.json`.
+
+The generator adapts dashboard3's study structure and aggregation logic. It reads
+`results/plot_data/` for cohort-aware evidence and `results/report_data/` for the
+curated report aggregates. `make refresh-dashboard` now regenerates plot exports from verified raw evidence
+before rebuilding the dashboard. The report CSVs remain inputs: the dashboard refresh does
+not run the external dissertation R pipeline. Every study lists its input files,
+comparison design, experiment IDs and limitations. Missing telemetry stays missing.
+
+Run the focused checks with:
+
+```bash
+python3 -m pytest tests/test_dashboard_studies.py tests/test_dashboard_results.py tests/test_build_dashboard_site.py
+node dashboard/site.test.cjs
+```
+
+## Part 3 validation — 2 November 2026
+
+The detailed studies use 1,474 unique completed trials across 409 experiment IDs;
+a trial supporting multiple studies counts once in the headline. All 270 unique
+controlled effects have been independently reconciled with current trial data.
+Student-t quantiles now use SciPy and retain fractional Welch degrees of freedom.
+E404 → E589 on L40S is inconclusive (+5.10%, 95% CI −1.74% to +11.94%).
+Report-based chart intervals and request-SLO goodput are refreshed from the
+verified trial exports. Install dependencies with `python -m pip install -e ".[dev]"`
+before running the generators. See `docs/dashboard3-data-audit.md` for scope and
+reproduction details. Parts 4–5, the reorganised analysis and the cross-page links were developed
+in the dashboard3 sandbox and promoted here; this directory is the publication artifact.
+
+## Part 4 · Recommendations
+
+`recommendations.html` asks for task, parameter-count band, GPU type and count, priority and (for
+inference) prompt length and concurrency, and keeps the selection in the URL. It runs entirely in the
+browser. `scripts/build_dashboard_recommendations.py` indexes every controlled contrast in
+`studies-data.json` (and S7's real-text contrasts from `all_controlled_effects.csv`) with its platform,
+model parameter count and GPU count; `recommendations-engine.js` grades evidence as direct, nearby,
+other-platform or out of range, and never ranks out-of-range evidence. Statuses are worth testing,
+mixed, trade-off, inconclusive / insufficient evidence, no measurable gain and avoid. Missing
+confidence intervals are shown as unavailable, never as zero. A size band is not an architecture
+match, and serving-load mismatches are always disclosed. `node dashboard/recommendations.test.cjs`
+checks provenance, tiers, abstention, status rules and the Part 2 claims that render from this data.
+
+## Part 5 · Diagnostics
+
+`scripts/build_dashboard_diagnostics.py` joins each current performance trial to its raw record
+(SHA-256 checked) and writes per-condition telemetry plus a small cross-link index. Health-check
+thresholds are defined once in that script. Power is node power divided by GPU count (an average
+per board); memory and temperature are per-board maxima. Real-text (S7) runs fail step-jitter and
+trial-agreement checks by design and are labelled as expected. `node dashboard/diagnostics.test.cjs`
+checks that no check passes without its measurements.
+
+## Cross-page links
+
+`links.js` and `diagnostics-index.js` are loaded by every page. Experiment IDs open
+`diagnostics.html#open=E###@platform`; diagnostics state (filters, study, flagged-only, selected
+check, open row) lives in the URL hash.

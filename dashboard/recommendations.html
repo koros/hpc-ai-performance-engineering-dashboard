@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Part 4 &middot; Recommendations &middot; HPC AI Performance Engineering</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" />
+<link rel="icon" type="image/svg+xml" href="logo.svg" />
+<style>
+  :root {
+    color-scheme: light;
+    --page: #f9f9f7; --surface: #fcfcfb; --surface-2: #f2f1ee;
+    --text-primary: #0b0b0b; --text-secondary: #52514e; --text-muted: #898781;
+    --grid: #e1e0d9; --baseline: #c3c2b7; --border: rgba(11,11,11,0.10);
+    --blue: #2a78d6; --good: #0ca30c; --critical: #d03b3b; --warning: #b77900;
+    --o1: #86b6ef; --o2: #3987e5; --o3: #1c5cab; --o4: #0d366b;
+    --band: rgba(137,135,129,0.14); --neutral-mark: #898781; --on-o3: #fff; --on-o4: #fff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --page: #0d0d0d; --surface: #1a1a19; --surface-2: #222221;
+      --text-primary: #ffffff; --text-secondary: #c3c2b7; --text-muted: #898781;
+      --grid: #2c2c2a; --baseline: #383835; --border: rgba(255,255,255,0.10);
+      --blue: #3987e5; --warning: #c98500;
+      --o1: #184f95; --o2: #2a78d6; --o3: #5598e7; --o4: #9ec5f4;
+      --band: rgba(195,194,183,0.12); --on-o3: #0d0d0d; --on-o4: #0d0d0d;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --surface-2: #222221;
+    --text-primary: #ffffff; --text-secondary: #c3c2b7; --text-muted: #898781;
+    --grid: #2c2c2a; --baseline: #383835; --border: rgba(255,255,255,0.10);
+    --blue: #3987e5; --warning: #c98500;
+    --o1: #184f95; --o2: #2a78d6; --o3: #5598e7; --o4: #9ec5f4; --band: rgba(195,194,183,0.12); --on-o3: #0d0d0d; --on-o4: #0d0d0d;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { background: var(--page); color: var(--text-primary); font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif; line-height: 1.5; padding-bottom: 64px; }
+  .wrap { max-width: 1160px; margin: 0 auto; padding: 0 20px; }
+  code, .mono { font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.92em; }
+  header.hero { padding: 40px 20px 28px; background: linear-gradient(180deg, var(--surface-2), var(--page)); border-bottom: 1px solid var(--border); }
+  .eyebrow { font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 10px; }
+  h1 { font-size: clamp(24px, 3.6vw, 34px); line-height: 1.15; margin: 0 0 12px; }
+  .lede { font-size: 15.5px; color: var(--text-secondary); max-width: 78ch; margin: 0 0 14px; }
+  .snapshot-line { font-size: 13.5px; color: var(--text-muted); margin: 0; max-width: 90ch; }
+  .part-nav { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .part-pill { font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--border); color: var(--text-secondary); text-decoration: none; background: var(--surface); }
+  .part-pill:hover { color: var(--text-primary); background: var(--surface-2); }
+  .part-pill.active { background: var(--text-primary); color: var(--page); border-color: var(--text-primary); }
+  .sandbox { display: inline-block; font-size: 10.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--warning); border: 1px dashed var(--warning); border-radius: 999px; padding: 1px 8px; margin-left: 8px; vertical-align: middle; }
+
+  .layout { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 24px; align-items: start; padding-top: 24px; }
+  @media (max-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr); } form.controls { position: static !important; } }
+  form.controls { position: sticky; top: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px 16px 14px; font-size: 13px; }
+  form.controls h2 { font-size: 15px; margin: 0 0 2px; }
+  form.controls .hint { color: var(--text-muted); font-size: 12px; margin: 0 0 6px; }
+  .field { margin-top: 12px; }
+  .field > label, .field > .lbl { display: block; font-weight: 600; font-size: 12px; color: var(--text-secondary); margin-bottom: 5px; }
+  select { width: 100%; font: inherit; font-size: 13px; padding: 7px 9px; border: 1px solid var(--border); border-radius: 8px; background: var(--page); color: var(--text-primary); }
+  .seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border: 1px solid var(--border); border-radius: 9px; overflow: hidden; background: var(--page); }
+  .seg input { position: absolute; opacity: 0; pointer-events: none; }
+  .seg label { text-align: center; padding: 7px 4px; cursor: pointer; font-weight: 600; font-size: 12.5px; color: var(--text-secondary); }
+  .seg label + input + label, .seg input + label ~ label { border-left: 1px solid var(--border); }
+  .seg input:checked + label { background: var(--text-primary); color: var(--page); }
+  .seg input:focus-visible + label { outline: 2px solid var(--blue); outline-offset: -2px; }
+  .inf-only[hidden] { display: none; }
+  .btn { font: inherit; font-size: 12.5px; font-weight: 600; border: 1px solid var(--border); background: var(--page); color: var(--text-primary); border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+  .btn:hover { background: var(--surface-2); }
+  .btn.primary { background: var(--blue); color: #fff; border-color: transparent; }
+  .row-btns { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+  :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 0 0 16px; }
+  .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 11px 14px; }
+  .kpi .value { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.25; }
+  .kpi .label { font-size: 12px; color: var(--text-secondary); }
+  .verdict-line { font-size: 16px; font-weight: 600; margin: 0 0 6px; max-width: 75ch; }
+  .verdict-sub { font-size: 13.5px; color: var(--text-secondary); margin: 0 0 16px; max-width: 85ch; }
+  .callout { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--blue); border-radius: 0 12px 12px 0; padding: 12px 16px; margin: 0 0 16px; font-size: 13.5px; color: var(--text-secondary); }
+  .callout.warn { border-left-color: var(--warning); }
+  .callout b { color: var(--text-primary); }
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px 18px; margin: 0 0 16px; }
+  .panel > h2 { font-size: 17px; margin: 0 0 4px; }
+  .panel > .sub { font-size: 12.5px; color: var(--text-muted); margin: 0 0 12px; max-width: 90ch; }
+  h3.group { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); margin: 22px 0 8px; display: flex; align-items: center; gap: 8px; }
+  h3.group .count { font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+
+  /* coverage map */
+  .cov-wrap { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+  table.cov { border-collapse: separate; border-spacing: 3px; font-size: 12px; width: 100%; }
+  table.cov caption { text-align: left; font-weight: 700; font-size: 12.5px; padding: 0 0 4px 2px; }
+  table.cov caption .you { font-weight: 600; color: var(--blue); font-size: 11px; margin-left: 6px; }
+  table.cov th { font-weight: 600; color: var(--text-muted); font-size: 11px; text-align: center; }
+  table.cov th.rowh { text-align: left; color: var(--text-secondary); white-space: nowrap; padding-right: 4px; }
+  table.cov td { height: 30px; text-align: center; border-radius: 6px; font-variant-numeric: tabular-nums; font-weight: 600; background: var(--surface-2); color: var(--text-muted); }
+  table.cov td.n1 { background: var(--o1); color: var(--text-primary); }
+  table.cov td.n2 { background: var(--o2); color: #fff; }
+  table.cov td.n3 { background: var(--o3); color: var(--on-o3); }
+  table.cov td.n4 { background: var(--o4); color: var(--on-o4); }
+  table.cov td.target { box-shadow: inset 0 0 0 2px var(--text-primary); }
+  table.cov tr.ghost th.rowh { color: var(--blue); font-style: italic; }
+  table.cov tr.ghost td { background: transparent; border: 1px dashed var(--baseline); }
+  .cov-legend { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; font-size: 11.5px; color: var(--text-muted); margin-top: 8px; }
+  .cov-legend i { display: inline-block; width: 14px; height: 10px; border-radius: 3px; vertical-align: -1px; margin-right: 4px; }
+
+  /* lever cards */
+  article.lever { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px 12px; margin: 0 0 12px; }
+  .lever-head { display: flex; gap: 10px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; }
+  .kicker { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); margin: 0 0 2px; font-weight: 700; }
+  article.lever h4 { font-size: 16px; margin: 0; line-height: 1.3; }
+  article.lever h4 .vs { font-weight: 500; color: var(--text-muted); font-size: 13.5px; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+  .st-try { background: rgba(12,163,12,0.14); color: var(--good); }
+  .st-avoid { background: rgba(208,59,59,0.14); color: var(--critical); }
+  .st-mixed, .st-tradeoff { background: rgba(183,121,0,0.14); color: var(--warning); }
+  .st-skip { background: var(--surface-2); color: var(--text-secondary); }
+  .st-unclear { background: transparent; color: var(--text-secondary); border: 1px dashed var(--baseline); }
+  .tier { border: 1px solid var(--border); color: var(--text-secondary); background: var(--page); }
+  .tier .dots { letter-spacing: 1px; color: var(--blue); }
+  .effect { font-size: 14px; margin: 8px 0 2px; }
+  .effect b { font-variant-numeric: tabular-nums; }
+  .effect-sub { font-size: 12.5px; color: var(--text-secondary); margin: 0 0 6px; }
+  .lever-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; margin-top: 6px; }
+  .lever-body figure.chart { max-width: 720px; }
+  .lever-body .howto { columns: 2 280px; column-gap: 24px; }
+  .lever-body .howto > * { break-inside: avoid; }
+  .howto { font-size: 12.5px; color: var(--text-secondary); }
+  .howto p { margin: 0 0 6px; }
+  .howto b { color: var(--text-primary); }
+  .howto ul { margin: 4px 0 0; padding-left: 16px; }
+  a.study-link { color: var(--blue); text-decoration: none; }
+  a.study-link:hover { text-decoration: underline; }
+  .idlink { color: var(--text-secondary); font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 11.5px; }
+  details.more { margin-top: 6px; }
+  .applies { font-size: 12.5px; color: var(--text-secondary); margin: 2px 0 6px; padding-left: 10px; border-left: 3px solid var(--blue); }
+  .diag-warn { font-size: 12.5px; color: var(--text-secondary); background: rgba(183,121,0,0.10); border-left: 3px solid var(--warning); border-radius: 0 8px 8px 0; padding: 6px 10px; margin: 6px 0 4px; }
+  .diag-warn a.xl-id { font-size: 11.5px; }
+  details.more > summary { cursor: pointer; font-size: 12.5px; font-weight: 600; color: var(--text-secondary); padding: 6px 0; }
+  details.out-of-range { background: var(--surface); border: 1px dashed var(--baseline); border-radius: 14px; padding: 10px 16px; margin: 10px 0 12px; }
+  details.out-of-range > summary { cursor: pointer; font-weight: 600; font-size: 13.5px; }
+  details.out-of-range[open] > summary { margin-bottom: 10px; }
+
+  /* charts */
+  figure.chart { margin: 0; min-width: 0; }
+  figure.chart figcaption { font-size: 11.5px; color: var(--text-muted); margin-top: 4px; }
+  svg { display: block; width: 100%; height: auto; overflow: visible; }
+  svg text { fill: var(--text-muted); font-size: 11px; font-family: inherit; }
+  svg .lbl { fill: var(--text-secondary); }
+  svg .lbl.strong { fill: var(--text-primary); font-weight: 600; }
+  svg .grid { stroke: var(--grid); stroke-width: 1; }
+  svg .axis { stroke: var(--baseline); stroke-width: 1; }
+  svg .zero { stroke: var(--text-muted); stroke-width: 1; }
+  svg .band { fill: var(--band); }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 11.5px; color: var(--text-secondary); margin: 0 0 4px; }
+  .legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .legend i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .viz-tip { position: fixed; pointer-events: none; z-index: 50; background: var(--surface); color: var(--text-primary); border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; font-size: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.14); max-width: 320px; display: none; white-space: pre-line; }
+
+  /* inference */
+  table.data { border-collapse: collapse; width: 100%; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+  table.data th, table.data td { padding: 6px 9px; border-bottom: 1px solid var(--border); text-align: left; }
+  table.data th { font-size: 10.5px; text-transform: uppercase; letter-spacing: .03em; color: var(--text-muted); background: var(--surface-2); font-weight: 700; }
+  table.data td.num, table.data th.num { text-align: right; }
+  table.data tr.win td { font-weight: 600; }
+  .tbl-wrap { overflow-x: auto; }
+  .obj-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 6px 0 14px; }
+  .obj { border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; background: var(--page); }
+  .obj.sel { border-color: var(--blue); box-shadow: inset 0 0 0 1px var(--blue); }
+  .obj .o-label { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); font-weight: 700; }
+  .obj .o-win { font-size: 15px; font-weight: 700; margin: 2px 0; }
+  .obj .o-val { font-size: 12.5px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+
+  pre.plan { background: var(--page); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 12px; line-height: 1.55; overflow-x: auto; white-space: pre-wrap; margin: 8px 0 0; }
+  .muted { color: var(--text-muted); }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  footer { padding: 18px 0; } footer p { font-size: 12px; color: var(--text-muted); max-width: 95ch; }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">HPC AI Performance Engineering</p>
+    <nav class="part-nav" aria-label="Report sections">
+      <a class="part-pill" href="index.html">Part 1 &middot; Experiment Catalog</a>
+      <a class="part-pill" href="analysis.html">Part 2 &middot; Analysis &amp; Findings</a>
+      <a class="part-pill" href="studies.html">Part 3 &middot; Detailed Studies</a>
+      <a class="part-pill active" href="recommendations.html" aria-current="page">Part 4 &middot; Recommendations</a>
+      <a class="part-pill" href="diagnostics.html">Part 5 &middot; Diagnostics</a>
+    </nav>
+    <h1>What should I benchmark first?</h1>
+    <p class="lede">
+      Describe your workload and this page ranks every measured tuning lever by how close its evidence is to you,
+      what it did there, and how consistently. When the nearest evidence is too far away it says so instead of guessing.
+      It never predicts your throughput &mdash; it tells you which comparisons are worth running and what to expect from them.
+    </p>
+    <p class="snapshot-line" id="snapshotLine"></p>
+  </div>
+</header>
+
+<main class="wrap layout">
+  <form class="controls" id="controls" aria-label="Your workload">
+    <h2>Your workload</h2>
+    <p class="hint">Changes apply instantly and are kept in the link.</p>
+    <div class="field">
+      <span class="lbl" id="mode-lbl">Task</span>
+      <div class="seg" role="radiogroup" aria-labelledby="mode-lbl">
+        <input type="radio" name="mode" id="mode-t" value="training" checked><label for="mode-t">Training</label>
+        <input type="radio" name="mode" id="mode-i" value="inference"><label for="mode-i">Inference</label>
+      </div>
+    </div>
+    <div class="field"><label for="size">Model parameters</label>
+      <select id="size" name="size">
+        <option value="small">Under 1B (BERT / GPT-2 class)</option>
+        <option value="1b" selected>1–2B (e.g. TinyLlama-1.1B)</option>
+        <option value="3b">2–4B (e.g. 3B)</option>
+        <option value="7b">4–8B (e.g. Qwen2.5-7B)</option>
+        <option value="large">Over 8B</option>
+      </select></div>
+    <div class="field"><label for="hardware">GPU</label>
+      <select id="hardware" name="hardware">
+        <option value="h100">NVIDIA H100 (NVLink)</option>
+        <option value="l40s" selected>NVIDIA L40S (PCIe)</option>
+        <option value="other">Other / unknown</option>
+      </select></div>
+    <div class="field">
+      <span class="lbl" id="gpus-lbl">GPUs</span>
+      <div class="seg" role="radiogroup" aria-labelledby="gpus-lbl">
+        <input type="radio" name="gpus" id="g1" value="1"><label for="g1">1</label>
+        <input type="radio" name="gpus" id="g2" value="2"><label for="g2">2</label>
+        <input type="radio" name="gpus" id="g4" value="4"><label for="g4">4</label>
+        <input type="radio" name="gpus" id="g8" value="8" checked><label for="g8">8</label>
+        <input type="radio" name="gpus" id="g16" value="16"><label for="g16">16</label>
+      </div>
+    </div>
+    <div class="field"><label for="priority">Optimise for</label>
+      <select id="priority" name="priority">
+        <option value="throughput">Throughput</option>
+        <option value="memory">Lower memory</option>
+        <option value="latency">Latency (inference)</option>
+        <option value="energy">Energy per token</option>
+      </select></div>
+    <div class="field inf-only" hidden>
+      <span class="lbl" id="prompt-lbl">Prompt length</span>
+      <div class="seg" role="radiogroup" aria-labelledby="prompt-lbl">
+        <input type="radio" name="prompt" id="p1" value="128" checked><label for="p1">Short (~128)</label>
+        <input type="radio" name="prompt" id="p2" value="1280"><label for="p2">Long (~1,280)</label>
+      </div>
+    </div>
+    <div class="field inf-only" hidden>
+      <span class="lbl" id="conc-lbl">Concurrent requests</span>
+      <div class="seg" role="radiogroup" aria-labelledby="conc-lbl">
+        <input type="radio" name="concurrency" id="c1" value="1"><label for="c1">1</label>
+        <input type="radio" name="concurrency" id="c2" value="2"><label for="c2">2</label>
+        <input type="radio" name="concurrency" id="c4" value="4"><label for="c4">4</label>
+        <input type="radio" name="concurrency" id="c8" value="8" checked><label for="c8">8</label>
+      </div>
+    </div>
+    <div class="row-btns">
+      <button type="button" class="btn" id="copyLink">Copy link</button>
+      <button type="button" class="btn" id="resetBtn">Reset</button>
+    </div>
+  </form>
+
+  <div>
+    <div id="status" role="status" class="sr-only"></div>
+    <section id="results" aria-label="Recommendations"></section>
+    <noscript><p>This page needs JavaScript. The underlying evidence is on <a href="studies.html">Part 3 &middot; Detailed Studies</a>.</p></noscript>
+  </div>
+</main>
+
+<footer><div class="wrap">
+  <p><b>Method.</b> Every contrast row and serving-layout row in the studies export is indexed with its platform, workload parameter count and GPU count.
+  Evidence is <b>direct</b> when platform, GPU count and parameter band all match (a parameter band is not an architecture match, and for inference the serving load is reported separately); <b>nearby</b> on the same platform within one GPU-count doubling and ~3&times; parameters;
+  <b>other platform</b> at the same distance on different hardware; otherwise <b>out of range</b> and never ranked. A lever's status uses only its closest tier:
+  <i>worth testing</i> when most contrasts there help (&ge;3% with a 95% CI excluding zero) and none hurt; <i>avoid</i> when most hurt and none help; <i>no measurable gain</i> when none help or hurt and most show no material effect (95% CI inside ±3%); <i>inconclusive / insufficient evidence</i> when none help or hurt and most are inconclusive or lack an interval; otherwise <i>mixed</i>.
+  Memory changes and layout metrics are means without CIs in the export.</p>
+  <p id="footSource"></p>
+</div></footer>
+<div class="viz-tip" id="tip" role="tooltip"></div>
+
+<script src="diagnostics-index.js"></script>
+<script src="links.js"></script>
+<script src="recommendations-data.js"></script>
+<script src="recommendations-engine.js"></script>
+<script>
+(function () {
+  const D = RECO_DATA, E = RecoEngine;
+  XL.injectStyles();
+  const form = document.getElementById('controls');
+  const results = document.getElementById('results');
+  const tip = document.getElementById('tip');
+  const DEFAULTS = { mode: 'training', size: '1b', hardware: 'l40s', gpus: '8', priority: 'throughput', prompt: '128', concurrency: '8' };
+
+  const SIZE_LABEL = { small: 'under 1B', '1b': '1–2B', '3b': '2–4B', '7b': '4–8B', large: 'over 8B' };
+  const HW = { h100: 'H100', l40s: 'L40S', other: 'other hardware' };
+  const STATUS = { try: 'Worth testing', mixed: 'Mixed results', tradeoff: 'Trade-off', unclear: 'Inconclusive / insufficient evidence', skip: 'No measurable gain', avoid: 'Avoid' };
+  const STATUS_ICON = { try: '✓', mixed: '±', tradeoff: '⇄', unclear: '?', skip: '–', avoid: '✕' };
+  /** 95% CI text; missing bounds stay missing (e.g. a condition with a single trial). */
+  const ciText = (lo, hi) => lo == null || hi == null ? 'CI unavailable: insufficient repetitions' : `95% CI ${pct(lo)} to ${pct(hi)}`;
+  const TIER = { direct: 'Direct match', near: 'Nearby', transfer: 'Other platform', distant: 'Out of range' };
+  const TIER_DOTS = { direct: '●●●', near: '●●○', transfer: '●○○', distant: '○○○' };
+  const VERDICT = { helps: 'helps', hurts: 'hurts', no_material_effect: 'no material effect', inconclusive: 'inconclusive' };
+
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const sgn = (v, d = 1) => (v > 0 ? '+' : v < 0 ? '−' : '±') + Math.abs(v).toFixed(d);
+  const pct = (v, d = 1) => sgn(v, d) + '%';
+  const fmt = (v, d = 0) => Number(v).toLocaleString('en-GB', { maximumFractionDigits: d, minimumFractionDigits: d });
+  const short = w => w.replace('-1.1B', '').replace('2.5-7B', '2.5');
+  const plat = p => p.toUpperCase();
+  const splitIds = ids => String(ids).split(/\s*(?:→|\/|,)\s*/).filter(Boolean);
+  // Each experiment ID opens its hardware diagnostics; failed health checks show as chips.
+  const idLinks = (ids, platform) => splitIds(ids).map(id => XL.diagLinkHtml(id, platform, { text: id })).join(' → ');
+  /** Health-check flags on the experiments behind a set of contrasts / layout rows. */
+  function diagIssues(rows) {
+    const out = new Map();
+    for (const r of rows) for (const id of splitIds(r.ids || r.id)) {
+      const f = XL.flags(id, r.platform);
+      if (f.length) out.set(`${id}@${r.platform}`, { id, platform: r.platform, flags: f });
+    }
+    return [...out.values()];
+  }
+  function diagWarning(rows, scope) {
+    const issues = diagIssues(rows);
+    if (!issues.length) return '';
+    const list = issues.slice(0, 4).map(i => `<a class="xl-id" href="${XL.diag(i.id, i.platform)}">${esc(i.id)}@${esc(i.platform)}</a> (${i.flags.map(XL.checkLabel).join(', ')})`).join(', ');
+    return `<p class="diag-warn">⚠ Diagnostics flag ${issues.length} of the experiments behind ${scope}: ${list}${issues.length > 4 ? ', …' : ''}. Check them before relying on this.</p>`;
+  }
+
+  function el(html) { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild; }
+
+  /* ---------- state <-> form <-> hash ---------- */
+  function readForm() { return Object.fromEntries(new FormData(form)); }
+  function writeForm(s) {
+    for (const [k, v] of Object.entries(s)) {
+      const f = form.elements[k]; if (!f) continue;
+      if (f instanceof RadioNodeList) { for (const r of form.querySelectorAll(`[name="${k}"]`)) r.checked = r.value === v; }
+      else f.value = v;
+    }
+  }
+  function fromHash() {
+    const p = new URLSearchParams(location.hash.slice(1)), s = { ...DEFAULTS };
+    for (const k of Object.keys(DEFAULTS)) if (p.has(k)) s[k] = p.get(k);
+    return s;
+  }
+  function toHash(s) { history.replaceState(null, '', '#' + new URLSearchParams(s).toString()); }
+
+  /* ---------- tooltip ---------- */
+  function bindTips(root) {
+    root.querySelectorAll('[data-tip]').forEach(n => {
+      const show = e => { tip.textContent = n.getAttribute('data-tip'); tip.style.display = 'block'; move(e); };
+      const move = e => {
+        const x = e.clientX ?? (n.getBoundingClientRect().left + 10), y = e.clientY ?? n.getBoundingClientRect().top;
+        const w = tip.offsetWidth, h = tip.offsetHeight;
+        tip.style.left = Math.min(x + 14, innerWidth - w - 8) + 'px';
+        tip.style.top = (y + 14 + h > innerHeight ? y - h - 10 : y + 14) + 'px';
+      };
+      n.addEventListener('mouseenter', show); n.addEventListener('mousemove', move);
+      n.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+      n.addEventListener('focus', e => { const r = n.getBoundingClientRect(); show({ clientX: r.right, clientY: r.top }); });
+      n.addEventListener('blur', () => { tip.style.display = 'none'; });
+    });
+  }
+
+  /* ---------- coverage map ---------- */
+  function coverageMap(s) {
+    const cells = E.coverage(D, s.mode);
+    const platforms = ['h100', 'l40s'];
+    const gpuCols = [1, 2, 4, 8]; if (s.gpus === '16') gpuCols.push(16);
+    const models = [...new Map(cells.map(c => [c.model, c.params])).entries()].sort((a, b) => a[1] - b[1]);
+    const inBand = p => E.sizeDistance(p, s.size) === 0;
+    const anyInBand = models.some(([, p]) => inBand(p));
+    const [blo] = E.SIZE_BANDS[s.size];
+    const shade = n => n === 0 ? '' : n <= 2 ? 'n1' : n <= 5 ? 'n2' : n <= 10 ? 'n3' : 'n4';
+    const unit = s.mode === 'training' ? 'contrast' : 'layout condition';
+    const tables = platforms.map(pf => {
+      let rows = models.map(([m, p]) => ({ m, p, ghost: false }));
+      if (!anyInBand) {
+        rows.push({ m: `Your model (${SIZE_LABEL[s.size]})`, p: Math.max(blo, 1), ghost: true });
+        rows.sort((a, b) => a.p - b.p);
+      }
+      const you = s.hardware === pf ? '<span class="you">← your GPU</span>' : '';
+      const body = rows.map(r => {
+        const tds = gpuCols.map(g => {
+          const c = r.ghost ? null : cells.find(c => c.platform === pf && c.model === r.m && c.gpus === g);
+          const n = c ? c.n : 0;
+          const target = s.hardware === pf && String(g) === s.gpus && (r.ghost || inBand(r.p));
+          const t = r.ghost ? 'No measurements at this size' : `${plat(pf)} · ${r.m} · ${g} GPU${g > 1 ? 's' : ''}\n${n ? n + ' ' + unit + (n > 1 ? 's' : '') : 'Not measured'}`;
+          return `<td class="${shade(n)}${target ? ' target' : ''}" tabindex="0" data-tip="${esc(t)}">${n || (r.ghost ? '' : '·')}</td>`;
+        }).join('');
+        return `<tr class="${r.ghost ? 'ghost' : ''}"><th class="rowh" scope="row">${esc(r.ghost ? r.m : short(r.m))}</th>${tds}</tr>`;
+      }).join('');
+      return `<table class="cov"><caption>${plat(pf)}${you}</caption><thead><tr><th></th>${gpuCols.map(g => `<th scope="col">${g} GPU${g > 1 ? 's' : ''}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table>`;
+    }).join('');
+    return `<section class="panel" aria-labelledby="cov-h"><h2 id="cov-h">Where the evidence is</h2>
+      <p class="sub">Number of measured ${unit}s per platform, model and GPU count. The outlined cell is your workload; a dashed row means no model of your size was measured.</p>
+      <div class="cov-wrap">${tables}</div>
+      <div class="cov-legend"><span><i style="background:var(--surface-2)"></i>none</span><span><i style="background:var(--o1)"></i>1–2</span><span><i style="background:var(--o2)"></i>3–5</span><span><i style="background:var(--o3)"></i>6–10</span><span><i style="background:var(--o4)"></i>11+</span><span>· = not measured</span></div>
+    </section>`;
+  }
+
+  /* ---------- forest plot for one lever ---------- */
+  function forest(lever) {
+    const rows = lever.rows.slice(0, 12);
+    const W = 560, L = 170, R = 16, top = 22, rh = 22, H = top + rows.length * rh + 24;
+    let lo = Math.min(-5, ...rows.map(r => r.lo ?? r.change)), hi = Math.max(5, ...rows.map(r => r.hi ?? r.change));
+    const pad = (hi - lo) * 0.06; lo -= pad; hi += pad;
+    const x = v => L + (v - lo) / (hi - lo) * (W - L - R);
+    const step = [5, 10, 20, 25, 50, 100].find(s => (hi - lo) / s <= 6) || 100;
+    let ticks = '';
+    for (let t = Math.ceil(lo / step) * step; t <= hi; t += step)
+      ticks += `<line class="grid" x1="${x(t)}" x2="${x(t)}" y1="${top - 4}" y2="${H - 22}"/><text x="${x(t)}" y="${H - 8}" text-anchor="middle">${t === 0 ? '0' : sgn(t, 0) + '%'}</text>`;
+    const col = v => v === 'helps' ? 'var(--good)' : v === 'hurts' ? 'var(--critical)' : 'var(--neutral-mark)';
+    const marks = rows.map((r, i) => {
+      const y = top + i * rh + rh / 2, near = r.prox.rank === lever.tierRank, op = near ? 1 : 0.35;
+      const label = `${plat(r.platform)} · ${short(r.workload)} · ${r.gpus} GPU${r.gpus > 1 ? 's' : ''}`;
+      const t = `${label}${r.shape ? ' · ' + r.shape : ''}\n${r.control} → ${r.treatment}\n${D.studies[r.study].metric ? 'Useful tokens/s' : 'Throughput'} ${pct(r.change)} (${ciText(r.lo, r.hi)})\nVerdict: ${VERDICT[r.verdict]}${r.memChange != null ? '\nPeak memory ' + pct(r.memChange) : ''}\nEvidence: ${TIER[r.prox.tier]}\n${r.ids}${(() => { const f = diagIssues([r]); return f.length ? '\n⚠ Diagnostics: ' + f.map(i => i.id + ' ' + i.flags.map(XL.checkLabel).join(', ')).join('; ') : ''; })()}`;
+      const hollow = r.verdict === 'inconclusive';
+      return `<g opacity="${op}" tabindex="0" data-tip="${esc(t)}" role="img" aria-label="${esc(t.replace(/\n/g, '; '))}">
+        <rect x="0" y="${y - rh / 2}" width="${W}" height="${rh}" fill="transparent"/>
+        <text class="lbl${near ? ' strong' : ''}" x="${L - 10}" y="${y + 4}" text-anchor="end">${esc(label)}</text>
+        ${r.lo == null || r.hi == null ? '' : `<line x1="${x(r.lo)}" x2="${x(r.hi)}" y1="${y}" y2="${y}" stroke="${col(r.verdict)}" stroke-width="2" stroke-linecap="round"/>`}
+        <circle cx="${x(r.change)}" cy="${y}" r="4.5" fill="${hollow ? 'var(--surface)' : col(r.verdict)}" stroke="${hollow ? col(r.verdict) : 'var(--surface)'}" stroke-width="2"/>
+      </g>`;
+    }).join('');
+    const more = lever.rows.length > rows.length ? ` Showing the ${rows.length} closest of ${lever.rows.length}.` : '';
+    return `<figure class="chart">
+      <div class="legend" aria-hidden="true"><span><i style="background:var(--good)"></i>helps</span><span><i style="background:var(--neutral-mark)"></i>no material effect</span><span><i style="background:var(--critical)"></i>hurts</span><span><i style="border:2px solid var(--neutral-mark);background:transparent"></i>inconclusive</span></div>
+      <svg viewBox="0 0 ${W} ${H}" role="group" aria-label="Throughput change per measured context">
+        <rect class="band" x="${x(-E.MATERIAL)}" y="${top - 4}" width="${x(E.MATERIAL) - x(-E.MATERIAL)}" height="${H - 22 - top + 4}"/>
+        ${ticks}<line class="zero" x1="${x(0)}" x2="${x(0)}" y1="${top - 4}" y2="${H - 22}"/>
+        <text x="${L}" y="11" class="lbl">${D.studies[lever.study].metric ? 'Useful tokens/s' : 'Throughput'} change vs ${esc(lever.control)}</text>
+        ${marks}
+      </svg>
+      <figcaption>Dots: condition-mean change; bars: 95% CI (no bar: too few repetitions for an interval); shaded: ±${E.MATERIAL}% (no material effect). Faded rows are further from your workload.${more}</figcaption>
+    </figure>`;
+  }
+
+  /** Real-text levers: padding share before → after, and straggler imbalance, for the closest contrast. */
+  function padNote(lv) {
+    const r = lv.nearest[0];
+    if (r.padControl == null) return '';
+    return ` Padding: ${Math.round(100 * r.padControl)}% of processed tokens with ${esc(r.control)} → ${Math.round(100 * r.padTreatment)}% with ${esc(r.treatment)}` +
+      (r.imbalance > 1.2 ? `; busiest GPU handles ${r.imbalance.toFixed(2)}× the mean tokens (stragglers).` : '.');
+  }
+  function leverCard(lv, s) {
+    const st = D.studies[lv.study];
+    const status = s.priority === 'memory' && lv.memStatus ? lv.memStatus : lv.status;
+    const n = lv.nearest.length;
+    const counts = ['helps', 'no_material_effect', 'hurts', 'inconclusive'].filter(k => lv.counts[k])
+      .map(k => `${lv.counts[k]} ${VERDICT[k]}`).join(', ');
+    const range = n > 1 ? ` (range ${pct(lv.min)} to ${pct(lv.max)})` : '';
+    const where = [...new Set(lv.nearest.map(r => `${plat(r.platform)} ${short(r.workload)} ${r.gpus}×`))].slice(0, 4).join('; ');
+    const metricName = st.metric ? 'Useful tokens/s' : 'Throughput';
+    let effect = n > 1
+      ? `${metricName} <b>${pct(lv.median)}</b> median${range} across the ${n} closest contrasts: ${counts}.`
+      : `${metricName} <b>${pct(lv.median)}</b> (${ciText(lv.nearest[0].lo, lv.nearest[0].hi)}) in the one closest contrast: ${VERDICT[lv.nearest[0].verdict]}.`;
+    let mem = lv.memMedian != null ? `Peak memory per GPU ${pct(lv.memMedian)}${n > 1 ? ' median' : ''} (no CI).` : '';
+    if (s.priority === 'memory' && lv.memMedian != null) {
+      effect = `Peak memory <b>${pct(lv.memMedian)}</b>${n > 1 ? ' median' : ''} per GPU; throughput ${pct(lv.median)}.`;
+      mem = lv.memStatus === 'tradeoff' ? 'Saves memory, but costs most of the throughput.' : '';
+    }
+    const caveats = (st.caveats || []).map(c => `<li>${esc(c)}</li>`).join('');
+    const ids = lv.nearest.slice(0, 4).map(r => `${idLinks(r.ids, r.platform)} <span class="muted">${plat(r.platform)} ${esc(short(r.workload))} ${r.gpus}×</span>`).join('<br>');
+    return `<article class="lever">
+      <div class="lever-head">
+        <div><p class="kicker">${esc(st.family)}</p>
+        <h4>${esc(lv.treatment)} <span class="vs">vs ${esc(lv.control)}</span></h4></div>
+        <div class="chips">
+          <span class="chip st-${status}">${STATUS_ICON[status]} ${STATUS[status]}</span>
+          <span class="chip tier" title="Closest evidence: ${esc(TIER[lv.tier])}"><span class="dots" aria-hidden="true">${TIER_DOTS[lv.tier]}</span>${TIER[lv.tier]}</span>
+        </div>
+      </div>
+      <p class="effect">${effect}</p>
+      <p class="effect-sub">Measured on ${esc(where)}. ${esc(mem)}${padNote(lv)}</p>
+      ${st.appliesTo ? `<p class="applies">Applies only if ${esc(st.appliesTo)}.</p>` : ''}
+      ${diagWarning(lv.nearest, 'this result')}
+      <details class="more"><summary>Evidence, how to apply it and caveats</summary>
+      <div class="lever-body">
+        ${forest(lv)}
+        <div class="howto">
+          <p><b>How:</b> ${esc(st.how)}</p>
+          <p><b>Watch:</b> ${esc(st.watch)}</p>
+          ${caveats ? `<div><p><b>Study caveats:</b></p><ul>${caveats}</ul></div>` : ''}
+          <p style="margin-top:8px"><b>Replicate:</b><br>${ids}</p>
+          <p><a class="study-link" href="${XL.study(lv.study)}">${esc(st.title)} →</a><br>
+             <a class="study-link" href="${XL.diagStudy(lv.study)}">Hardware diagnostics for this study →</a></p>
+        </div>
+      </div></details>
+    </article>`;
+  }
+
+  /* ---------- training ---------- */
+  function training(s) {
+    const levers = E.rankLevers(s, D);
+    const inRange = levers.filter(l => l.tier !== 'distant');
+    const out = levers.filter(l => l.tier === 'distant');
+    const key = s.priority === 'memory' ? 'memStatus' : 'status';
+    const ranked = s.priority === 'memory' ? inRange.filter(l => l.memStatus) : inRange;
+    const noMem = s.priority === 'memory' ? inRange.filter(l => !l.memStatus) : [];
+    const groups = ['try', 'mixed', 'tradeoff', 'unclear', 'skip', 'avoid'];
+    const bestTier = inRange.length ? Math.min(...inRange.map(l => l.tierRank)) : 3;
+    const nTry = ranked.filter(l => l[key] === 'try').length, nAvoid = ranked.filter(l => l[key] === 'avoid').length;
+    const top = ranked.find(l => l[key] === 'try' && !D.studies[l.study].appliesTo);
+    const conditional = ranked.filter(l => l[key] === 'try' && D.studies[l.study].appliesTo).sort((a, b) => b.median - a.median)[0];
+
+    let html = '';
+    let headline;
+    if (!inRange.length) headline = `No measured lever is close enough to rank for a model with ${SIZE_LABEL[s.size]} parameters on ${s.gpus} × ${HW[s.hardware]}.`;
+    else if (top) headline = `Start by benchmarking ${top.treatment} against ${top.control} (${TIER[top.tier].toLowerCase()} evidence).`;
+    else headline = 'Nothing measured near your workload clearly helps — the default configuration held up.';
+    html += `<p class="verdict-line">${esc(headline)}</p>
+      <p class="verdict-sub">Training · ${SIZE_LABEL[s.size]} parameters · ${s.gpus} × ${HW[s.hardware]} · optimising for ${s.priority}. Ranked from ${D.contrasts.length} measured contrasts; nothing here is a prediction for your model.</p>`;
+    html += `<div class="kpi-grid">
+      <div class="kpi"><div class="value">${TIER_DOTS[TIERS[bestTier]]}</div><div class="label">Closest evidence: ${TIER[TIERS[bestTier]]}</div></div>
+      <div class="kpi"><div class="value">${nTry}</div><div class="label">levers worth testing</div></div>
+      <div class="kpi"><div class="value">${nAvoid}</div><div class="label">levers to avoid</div></div>
+      <div class="kpi"><div class="value">${out.length}</div><div class="label">out of range, not ranked</div></div>
+    </div>`;
+    if (s.priority === 'latency') html += `<div class="callout warn"><b>Latency is an inference objective.</b> Training levers are ranked by throughput instead.</div>`;
+    if (s.priority === 'energy') html += `<div class="callout warn"><b>No per-contrast energy measurements for training levers.</b> They are ranked by throughput; at fixed power draw, higher throughput lowers energy per token, but that has not been measured contrast by contrast.</div>`;
+    if (s.hardware === 'other') html += `<div class="callout warn"><b>Unknown hardware never counts as a direct match.</b> H100 (NVLink) and L40S (PCIe) behave very differently for communication-bound levers; treat everything below as hypotheses.</div>`;
+    if (bestTier >= 1 && inRange.length) html += `<div class="callout">No lever was measured at exactly your configuration. Each card uses only its closest evidence; open it to see every context it was measured in.</div>`;
+    if (conditional) html += `<div class="callout"><b>If your data is variable-length text padded to a fixed length:</b> ${esc(conditional.treatment)} instead of ${esc(conditional.control)} is the largest training effect measured in this project (${pct(conditional.median)} useful tokens/s, ${TIER[conditional.tier].toLowerCase()} evidence). It is ranked below but kept out of the headline, because it only applies to that kind of input.</div>`;
+    html += coverageMap(s);
+
+    for (const g of groups) {
+      const ls = ranked.filter(l => l[key] === g);
+      if (!ls.length) continue;
+      html += `<h3 class="group"><span class="chip st-${g}">${STATUS_ICON[g]} ${STATUS[g]}</span><span class="count">${ls.length}</span></h3>`;
+      html += ls.map(l => leverCard(l, s)).join('');
+    }
+    if (noMem.length) html += `<details class="out-of-range"><summary>${noMem.length} levers without memory measurements</summary>${noMem.map(l => leverCard(l, { ...s, priority: 'throughput' })).join('')}</details>`;
+    if (out.length) html += `<details class="out-of-range"${inRange.length ? '' : ' open'}><summary>${out.length} levers measured too far from your workload (context only, not ranked)</summary>
+      <p class="muted" style="font-size:12.5px;margin:0 0 10px">These were measured on a different platform and/or more than one GPU doubling or ~3× parameters away.</p>
+      ${out.map(l => leverCard(l, s)).join('')}</details>`;
+    html += plan(s, ranked.filter(l => l[key] === 'try').slice(0, 4), ranked.filter(l => l[key] === 'avoid'));
+    return html;
+  }
+
+  /* ---------- inference ---------- */
+  function barChart(rows, obj, winner) {
+    const o = E.OBJECTIVES[obj];
+    const sorted = [...rows].sort((a, b) => o.better === 'max' ? b[o.key] - a[o.key] : a[o.key] - b[o.key]);
+    const W = 560, L = 150, R = 80, bh = 18, gap = 10, top = 6, H = top + sorted.length * (bh + gap);
+    const max = Math.max(...sorted.map(r => r[o.key]));
+    const x = v => (v / max) * (W - L - R);
+    const dec = o.key === 'j' ? 2 : 0;
+    const bars = sorted.map((r, i) => {
+      const y = top + i * (bh + gap), w = r === winner;
+      const t = `${r.layout} (${r.id})\n${o.label}: ${fmt(r[o.key], dec)} ${o.unit}\nTokens/s ${fmt(r.tps, 0)} · p95 latency ${fmt(r.lat)} ms · TTFT p95 ${fmt(r.ttft, 1)} ms · ${fmt(r.j, 2)} J/token`;
+      return `<g tabindex="0" data-tip="${esc(t)}" role="img" aria-label="${esc(t.replace(/\n/g, '; '))}">
+        <rect x="0" y="${y - gap / 2}" width="${W}" height="${bh + gap}" fill="transparent"/>
+        <text class="lbl${w ? ' strong' : ''}" x="${L - 10}" y="${y + bh / 2 + 4}" text-anchor="end">${esc(r.layout)}</text>
+        <rect x="${L}" y="${y}" width="${Math.max(2, x(r[o.key]))}" height="${bh}" rx="3" fill="${w ? 'var(--blue)' : 'var(--baseline)'}"/>
+        <text class="lbl${w ? ' strong' : ''}" x="${L + x(r[o.key]) + 6}" y="${y + bh / 2 + 4}">${fmt(r[o.key], dec)} ${o.unit}</text>
+      </g>`;
+    }).join('');
+    return `<figure class="chart"><svg viewBox="0 0 ${W} ${H}" role="group" aria-label="${esc(o.label)} by layout">${bars}</svg>
+      <figcaption>${esc(o.label)} by layout (${o.better === 'max' ? 'higher' : 'lower'} is better); highlighted bar is the best measured layout. Means of 3 trials, no CI in the export.</figcaption></figure>`;
+  }
+
+  function inference(s) {
+    const r = E.rankLayouts(s, D);
+    const c = r.context, tier = c.prox.tier;
+    const obj = s.priority === 'memory' ? 'throughput' : s.priority;
+    const best = r.objectives[obj];
+    const lb = E.lowbit(s, D);
+    const loadText = sh => `prompt ${fmt(sh.prompt)}, ${sh.concurrency} concurrent`;
+    const ctx = `${c.model} on ${c.gpus} × ${plat(c.platform)}, ${loadText(r.shape)}`;
+    let headline;
+    if (s.priority === 'memory') headline = lb.prox.tier !== 'distant' ? 'For memory, benchmark 4-bit AWQ or GPTQ weights against BF16 first.' : 'No memory evidence is close to your workload; the closest is a 7B model on one H100.';
+    else if (tier === 'distant') headline = 'No serving-layout evidence is close enough to your workload to rank.';
+    else headline = `Benchmark ${best.winner.layout} first — it was the ${obj === 'throughput' ? 'fastest' : obj === 'energy' ? 'most energy-efficient' : 'lowest-latency'} layout${r.shape.exact ? '' : ` at the nearest measured load (${loadText(r.shape)})`}${best.margin != null ? `, ${best.margin.toFixed(0)}% ahead of ${best.runnerUp.layout}` : ''}.`;
+    const winners = new Set(['throughput', 'latency', 'ttft', 'energy'].map(k => r.objectives[k].winner.layout)); // every objective shown below
+
+    let html = `<p class="verdict-line">${esc(headline)}</p>
+      <p class="verdict-sub">Inference · ${SIZE_LABEL[s.size]} parameters · ${s.gpus} × ${HW[s.hardware]} · prompt ~${fmt(s.prompt)} · ${s.concurrency} concurrent · optimising for ${s.priority}.</p>
+      <div class="kpi-grid">
+        <div class="kpi"><div class="value">${TIER_DOTS[tier]}</div><div class="label">Hardware &amp; size-band match: ${TIER[tier]}</div></div>
+        <div class="kpi"><div class="value">${r.shape.exact ? 'Exact' : 'Nearest'}</div><div class="label">${r.shape.exact ? 'serving load measured as requested' : `load: measured ${esc(loadText(r.shape))}, not ${esc(loadText({ prompt: s.prompt, concurrency: s.concurrency }))}`}</div></div>
+        <div class="kpi"><div class="value">${r.rows.length}</div><div class="label">layouts measured at that load</div></div>
+        <div class="kpi"><div class="value">${winners.size === 1 ? 'Agree' : winners.size + ' winners'}</div><div class="label">${winners.size === 1 ? 'one layout wins all four objectives' : 'the four objectives (throughput, latency, first token, energy) favour different layouts'}</div></div>
+      </div>`;
+    if (s.hardware === 'other') html += `<div class="callout warn"><b>Unknown hardware never counts as a direct match.</b> Interconnect bandwidth decides how much tensor parallelism costs.</div>`;
+    if (tier !== 'direct' || !r.shape.exact) html += `<div class="callout${r.shape.exact ? '' : ' warn'}">Closest measured context: <b>${esc(ctx)}</b> (hardware/size: ${TIER[tier].toLowerCase()}${c.prox.dGpu ? `, ${c.gpus} instead of ${s.gpus} GPUs` : ''}${c.prox.dSize ? ', different model size' : ''}). ${r.shape.exact ? '' : `<b>Load mismatch:</b> ${esc(loadText({ prompt: s.prompt, concurrency: s.concurrency }))} was not measured on this hardware; the ranking below is for ${esc(loadText(r.shape))}, and layout winners can change with load.`}</div>`;
+    html += coverageMap(s);
+
+    if (tier !== 'distant') {
+      const card = k => {
+        const b = r.objectives[k], o = E.OBJECTIVES[k];
+        return `<div class="obj${k === obj ? ' sel' : ''}"><div class="o-label">${k === 'ttft' ? 'First token' : k[0].toUpperCase() + k.slice(1)}</div>
+          <div class="o-win">${esc(b.winner.layout)}</div>
+          <div class="o-val">${fmt(b.winner[o.key], o.key === 'j' ? 2 : 0)} ${o.unit}${b.margin != null ? ` · ${b.margin.toFixed(0)}% better than next` : ''}</div></div>`;
+      };
+      html += `<section class="panel" aria-labelledby="lay-h"><h2 id="lay-h">Serving layout</h2>
+        <p class="sub">${esc(ctx)}. ${esc(D.studies[c.study].how)}</p>
+        <div class="obj-grid">${['throughput', 'latency', 'ttft', 'energy'].map(card).join('')}</div>
+        ${barChart(r.rows, obj, best.winner)}
+        <details class="more"><summary>All layouts at this load</summary><div class="tbl-wrap"><table class="data">
+          <thead><tr><th>Layout</th><th class="num">Tokens/s</th><th class="num">p95 latency (ms)</th><th class="num">TTFT p95 (ms)</th><th class="num">J / token</th><th>Experiment</th></tr></thead>
+          <tbody>${best.sorted.map(x => `<tr class="${x === best.winner ? 'win' : ''}"><td>${esc(x.layout)}</td><td class="num">${fmt(x.tps)}</td><td class="num">${fmt(x.lat)}</td><td class="num">${fmt(x.ttft, 1)}</td><td class="num">${fmt(x.j, 2)}</td><td>${idLinks(x.id, x.platform)}</td></tr>`).join('')}</tbody>
+        </table></div></details>
+        ${diagWarning(r.rows, 'these layouts')}
+        <p class="howto" style="margin-top:8px"><b>Watch:</b> ${esc(D.studies[c.study].watch)} <a class="study-link" href="${XL.study(c.study)}">${esc(D.studies[c.study].title)} →</a> <a class="study-link" href="${XL.diagStudy(c.study)}">Diagnostics →</a></p>
+      </section>`;
+    }
+
+    // Quantization
+    const lbRows = lb.rows.filter(x => x.method !== 'BF16');
+    const lbBest = [...lbRows].sort((a, b) => b.thr - a.thr)[0];
+    const lbTier = lb.prox.tier;
+    html += `<section class="panel" aria-labelledby="lb-h"><h2 id="lb-h">Weight quantization <span class="chip tier" style="vertical-align:2px"><span class="dots" aria-hidden="true">${TIER_DOTS[lbTier]}</span>${TIER[lbTier]}</span></h2>
+      <p class="sub">Measured on Qwen2.5-7B, one H100, against BF16 (${idLinks('E270', 'h100')}). ${lbTier === 'distant' ? 'Too far from your workload to rank — shown for context.' : ''}</p>
+      <div class="tbl-wrap"><table class="data"><thead><tr><th>Format</th><th class="num">Throughput</th><th class="num">p95 latency</th><th class="num">Model memory</th><th class="num">Energy / token</th><th class="num">Perplexity</th><th>Experiment</th></tr></thead>
+      <tbody>${lbRows.map(x => `<tr class="${x === lbBest ? 'win' : ''}"><td>${esc(x.method)}</td><td class="num">${pct(x.thr)}</td><td class="num">${pct(x.lat)}</td><td class="num">${pct(-x.memSaved)}</td><td class="num">${pct(x.energy)}</td><td class="num">${pct(x.pplc)}</td><td>${idLinks(x.id, 'h100')}</td></tr>`).join('')}</tbody></table></div>
+      <p class="howto" style="margin-top:8px"><b>Watch:</b> ${esc(D.studies['core-lowbit'].watch)} <a class="study-link" href="${XL.study('core-lowbit')}">${esc(D.studies['core-lowbit'].title)} →</a> <a class="study-link" href="${XL.diagStudy('core-lowbit')}">Diagnostics →</a></p>
+    </section>`;
+
+    html += inferencePlan(s, r, obj, lb);
+    return html;
+  }
+
+  /* ---------- benchmark plan (copyable) ---------- */
+  function planBlock(lines) {
+    const text = lines.join('\n');
+    return `<section class="panel" aria-labelledby="plan-h"><h2 id="plan-h">Your benchmark plan</h2>
+      <p class="sub">A starting checklist generated from the ranking above. Paste it into an issue or lab notebook.</p>
+      <div class="row-btns" style="margin-top:0"><button type="button" class="btn primary" data-copy-plan>Copy as Markdown</button></div>
+      <pre class="plan" id="planText">${esc(text)}</pre></section>`;
+  }
+  function plan(s, tries, avoids) {
+    const L = [`## Benchmark plan — training, ${SIZE_LABEL[s.size]} params, ${s.gpus} × ${HW[s.hardware]} (${s.priority})`, '',
+      '1. **Baseline**: current config. Record model revision, precision, micro-batch × sequence, accumulation, global batch; measure tokens/s, peak memory/GPU and validation loss over ≥3 trials.'];
+    tries.forEach((l, i) => {
+      const lo = l.nearest.length > 1 ? `${pct(l.min)} to ${pct(l.max)}` : pct(l.median);
+      L.push(`${i + 2}. **${l.treatment}** vs ${l.control} — measured ${lo} ${D.studies[l.study].metric || 'throughput'} (${TIER[l.tier].toLowerCase()} evidence; replicates ${l.nearest[0].ids}).${D.studies[l.study].appliesTo ? ' Only if ' + D.studies[l.study].appliesTo + '.' : ''} Watch: ${D.studies[l.study].watch}`);
+    });
+    if (!tries.length) L.push('2. No lever has close evidence of helping: run one change at a time from the cards above and keep the baseline if nothing clears ±3%.');
+    if (avoids.length) L.push('', `Skip unless you have a reason: ${avoids.map(a => a.treatment).join(', ')}.`);
+    L.push('', `Evidence through ${D.evidenceDate.slice(0, 10)}. Source: ${location.href.split('#')[0]}#${new URLSearchParams(s)}`);
+    return planBlock(L);
+  }
+  function inferencePlan(s, r, obj, lb) {
+    const L = [`## Benchmark plan — inference, ${SIZE_LABEL[s.size]} params, ${s.gpus} × ${HW[s.hardware]} (${s.priority})`, '',
+      `1. **Load profile**: replay your prompt/output length distribution at ~${s.concurrency} concurrent requests; measure output tokens/s, p95 end-to-end latency, TTFT p95 and J/token over ≥3 trials.`];
+    if (r.context.prox.tier !== 'distant') {
+      const layouts = [...new Set(['throughput', 'latency', 'energy'].map(k => r.objectives[k].winner.layout))];
+      L.push(`2. **Layouts**: compare ${layouts.join(', ')}${layouts.length === 1 ? ' against your current layout' : ''} (closest evidence: ${r.context.model}, ${r.context.gpus} × ${plat(r.context.platform)}).`);
+    }
+    if (lb.prox.tier !== 'distant' || s.priority === 'memory') L.push(`${L.length - 1}. **Weights**: AWQ and GPTQ 4-bit vs BF16 with a task-quality check (measured on Qwen2.5-7B / 1 H100).`);
+    L.push('', `Evidence through ${D.evidenceDate.slice(0, 10)}. Source: ${location.href.split('#')[0]}#${new URLSearchParams(s)}`);
+    return planBlock(L);
+  }
+  const TIERS = E.TIERS;
+
+  /* ---------- render ---------- */
+  function render() {
+    const s = readForm();
+    form.querySelectorAll('.inf-only').forEach(n => { n.hidden = s.mode !== 'inference'; });
+    const lat = form.querySelector('#priority option[value="latency"]');
+    lat.textContent = s.mode === 'inference' ? 'Latency' : 'Latency (inference only)';
+    toHash(s);
+    results.innerHTML = s.mode === 'training' ? training(s) : inference(s);
+    bindTips(results);
+    const btn = results.querySelector('[data-copy-plan]');
+    if (btn) btn.addEventListener('click', () => copy(document.getElementById('planText').textContent, btn, 'Copy as Markdown'));
+    document.getElementById('status').textContent = 'Recommendations updated.';
+  }
+  async function copy(text, btn, label) {
+    try { await navigator.clipboard.writeText(text); btn.textContent = 'Copied ✓'; }
+    catch (e) { btn.textContent = 'Copy failed — select the text'; }
+    setTimeout(() => { btn.textContent = label; }, 1600);
+  }
+
+  document.getElementById('snapshotLine').textContent =
+    `Evidence through ${D.evidenceDate.slice(0, 10)} · ${D.contrasts.length} training contrasts, ${D.layouts.length} serving-layout conditions, ${D.lowbit.length} quantization conditions.`;
+  document.getElementById('footSource').textContent = `Data: ${D.source} (generated ${D.generatedAt}) via scripts/build_dashboard_recommendations.py. Your selections never leave the browser.`;
+  writeForm(fromHash());
+  form.addEventListener('change', render);
+  addEventListener('hashchange', () => { writeForm(fromHash()); render(); });
+  document.getElementById('copyLink').addEventListener('click', e => copy(location.href, e.currentTarget, 'Copy link'));
+  document.getElementById('resetBtn').addEventListener('click', () => { writeForm(DEFAULTS); render(); });
+  render();
+})();
+</script>
+</body>
+</html>

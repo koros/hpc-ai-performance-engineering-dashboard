@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Part 5 &middot; Diagnostics &middot; HPC AI Performance Engineering</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" />
+<link rel="icon" type="image/svg+xml" href="logo.svg" />
+<style>
+  :root {
+    color-scheme: light;
+    --page: #f9f9f7; --surface: #fcfcfb; --surface-2: #f2f1ee;
+    --text-primary: #0b0b0b; --text-secondary: #52514e; --text-muted: #898781;
+    --grid: #e1e0d9; --baseline: #c3c2b7; --border: rgba(11,11,11,0.10);
+    --blue: #2a78d6; --good: #0ca30c; --critical: #d03b3b; --warning: #b77900;
+    --h100: #2a78d6; --l40s: #eb6834;
+    --band: rgba(137,135,129,0.14);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --page: #0d0d0d; --surface: #1a1a19; --surface-2: #222221;
+      --text-primary: #ffffff; --text-secondary: #c3c2b7; --text-muted: #898781;
+      --grid: #2c2c2a; --baseline: #383835; --border: rgba(255,255,255,0.10);
+      --blue: #3987e5; --warning: #c98500; --h100: #3987e5; --l40s: #d95926;
+      --band: rgba(195,194,183,0.12);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --surface-2: #222221;
+    --text-primary: #ffffff; --text-secondary: #c3c2b7; --text-muted: #898781;
+    --grid: #2c2c2a; --baseline: #383835; --border: rgba(255,255,255,0.10);
+    --blue: #3987e5; --warning: #c98500; --h100: #3987e5; --l40s: #d95926;
+    --band: rgba(195,194,183,0.12);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { background: var(--page); color: var(--text-primary); font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif; line-height: 1.5; padding-bottom: 64px; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 0 20px; }
+  .mono, code { font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.92em; }
+  header.hero { padding: 40px 20px 28px; background: linear-gradient(180deg, var(--surface-2), var(--page)); border-bottom: 1px solid var(--border); }
+  .eyebrow { font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 10px; }
+  h1 { font-size: clamp(24px, 3.6vw, 34px); line-height: 1.15; margin: 0 0 12px; }
+  .lede { font-size: 15.5px; color: var(--text-secondary); max-width: 80ch; margin: 0 0 14px; }
+  .snapshot-line { font-size: 13.5px; color: var(--text-muted); margin: 0; max-width: 95ch; }
+  .part-nav { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .part-pill { font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--border); color: var(--text-secondary); text-decoration: none; background: var(--surface); }
+  .part-pill:hover { color: var(--text-primary); background: var(--surface-2); }
+  .part-pill.active { background: var(--text-primary); color: var(--page); border-color: var(--text-primary); }
+  .sandbox { display: inline-block; font-size: 10.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--warning); border: 1px dashed var(--warning); border-radius: 999px; padding: 1px 8px; margin-left: 8px; vertical-align: middle; }
+  :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+  /* filter bar */
+  .filters { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--page) 92%, transparent); backdrop-filter: blur(6px); border-bottom: 1px solid var(--border); padding: 10px 0; margin-bottom: 18px; }
+  .filters .wrap { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; font-size: 12.5px; }
+  .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 9px; overflow: hidden; background: var(--surface); }
+  .seg input { position: absolute; opacity: 0; pointer-events: none; }
+  .seg label { padding: 5px 11px; cursor: pointer; font-weight: 600; color: var(--text-secondary); white-space: nowrap; }
+  .seg label + input + label { border-left: 1px solid var(--border); }
+  .seg input:checked + label { background: var(--text-primary); color: var(--page); }
+  .seg input:focus-visible + label { outline: 2px solid var(--blue); outline-offset: -2px; }
+  select, input[type="search"] { font: inherit; font-size: 12.5px; padding: 5px 9px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text-primary); }
+  input[type="search"] { width: 150px; }
+  #theme { max-width: 230px; } #model { max-width: 190px; }
+  .chk { display: inline-flex; gap: 6px; align-items: center; font-weight: 600; color: var(--text-secondary); cursor: pointer; }
+  .btn { font: inherit; font-size: 12px; font-weight: 600; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary); border-radius: 999px; padding: 5px 12px; cursor: pointer; }
+  .btn:hover { background: var(--surface-2); }
+  .count-pill { margin-left: auto; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin: 0 0 16px; }
+  .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; }
+  .kpi .value { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.25; }
+  .kpi .value small { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+  .kpi .label { font-size: 12px; color: var(--text-secondary); }
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 18px 20px; margin: 0 0 16px; min-width: 0; }
+  .panel > h2 { font-size: 17px; margin: 0 0 4px; }
+  .panel > .sub { font-size: 12.5px; color: var(--text-muted); margin: 0 0 12px; max-width: 95ch; }
+
+  /* health checks */
+  .checks { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; }
+  div.check { display: grid; grid-template-columns: 34px 1fr auto; gap: 10px; align-items: center; border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; background: var(--page); }
+  div.check.active { border-color: var(--blue); box-shadow: inset 0 0 0 1px var(--blue); }
+  .check .rt-note { color: var(--text-secondary); font-style: italic; }
+  .check .states { display: block; font-size: 11.5px; color: var(--text-secondary); margin-top: 2px; }
+  button.linkish { all: unset; cursor: pointer; color: var(--blue); font-weight: 600; }
+  button.linkish:hover { text-decoration: underline; } button.linkish[aria-pressed="true"] { text-decoration: underline; }
+  button.n { all: unset; cursor: pointer; text-align: center; border-radius: 8px; padding: 4px 8px; }
+  button.n:hover:not([disabled]) { background: var(--surface-2); } button.n[disabled] { cursor: default; color: var(--text-muted); }
+  button.n[aria-pressed="true"] { background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--blue); }
+  button.n small { display: block; font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; }
+  button.linkish:focus-visible, button.n:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .check .icon { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 14px; }
+  .check .icon.ok { background: rgba(12,163,12,0.14); color: var(--good); }
+  .check .icon.warn { background: rgba(183,121,0,0.16); color: var(--warning); }
+  .check .icon.unk { background: var(--surface-2); color: var(--text-secondary); border: 1px dashed var(--baseline); }
+  .check .t { font-weight: 600; font-size: 13px; }
+  .check .d { font-size: 11.5px; color: var(--text-muted); }
+  .check .n { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  /* charts */
+  .chart-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  @media (max-width: 920px) { .chart-grid { grid-template-columns: minmax(0, 1fr); } }
+  .chart-grid .panel { margin: 0; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12px; color: var(--text-secondary); margin: 0 0 6px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .legend i.ring { background: transparent !important; border: 2px solid var(--text-muted); }
+  svg { display: block; width: 100%; height: auto; overflow: visible; }
+  svg text { fill: var(--text-muted); font-size: 11px; font-family: inherit; }
+  svg .lbl { fill: var(--text-secondary); }
+  svg .grid { stroke: var(--grid); stroke-width: 1; }
+  svg .axis { stroke: var(--baseline); stroke-width: 1; }
+  svg .ref { stroke: var(--text-muted); stroke-width: 1; stroke-dasharray: 4 4; }
+  svg .band { fill: var(--band); }
+  svg .pt { cursor: pointer; }
+  svg .pt:hover, svg .pt:focus { stroke: var(--text-primary); stroke-width: 2; }
+  figcaption { font-size: 11.5px; color: var(--text-muted); margin-top: 6px; }
+  .empty { font-size: 13px; color: var(--text-muted); padding: 30px 0; text-align: center; }
+  .viz-tip { position: fixed; pointer-events: none; z-index: 50; background: var(--surface); color: var(--text-primary); border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; font-size: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.14); max-width: 320px; display: none; white-space: pre-line; }
+
+  /* table */
+  .tbl-head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; margin-bottom: 8px; }
+  .tbl-head h2 { font-size: 17px; margin: 0; }
+  .tbl-head .btn { margin-left: auto; }
+  .tbl-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; }
+  table.data { border-collapse: collapse; width: 100%; font-size: 12px; font-variant-numeric: tabular-nums; }
+  table.data th, table.data td { padding: 6px 9px; border-bottom: 1px solid var(--border); white-space: nowrap; text-align: left; }
+  table.data th { font-size: 10.5px; text-transform: uppercase; letter-spacing: .03em; color: var(--text-muted); background: var(--surface-2); position: sticky; top: 0; font-weight: 700; }
+  table.data th button { all: unset; cursor: pointer; }
+  table.data th button:focus-visible { outline: 2px solid var(--blue); }
+  table.data th[aria-sort="ascending"] button::after { content: " ▲"; }
+  table.data th[aria-sort="descending"] button::after { content: " ▼"; }
+  table.data .num { text-align: right; }
+  table.data tbody tr.row { cursor: pointer; }
+  table.data tbody tr.row:hover td { background: var(--surface-2); }
+  table.data tbody tr.row.open td { background: var(--surface-2); font-weight: 600; }
+  table.data tr.detail > td { white-space: normal; background: var(--page); padding: 12px 14px 14px; }
+  tr.detail .detail-grid { position: sticky; left: 14px; width: calc(min(1240px, 100vw) - 110px); }
+  @media (max-width: 600px) { tr.detail .detail-grid { width: calc(100vw - 72px); } }
+  .pdot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 0; }
+  .sub-val { color: var(--text-muted); }
+  .meter { display: inline-block; width: 46px; height: 6px; border-radius: 999px; background: var(--surface-2); vertical-align: 1px; margin-left: 6px; overflow: hidden; }
+  .meter b { display: block; height: 100%; border-radius: 999px; background: var(--text-muted); }
+  .meter b.hi { background: var(--warning); }
+  .flag.exp { background: var(--surface-2); color: var(--text-secondary); }
+  .flag.unk { background: transparent; color: var(--text-muted); border: 1px dashed var(--baseline); }
+  .flag { display: inline-block; font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 999px; background: rgba(183,121,0,0.16); color: var(--warning); margin-right: 4px; }
+  .detail-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 16px; }
+  @media (max-width: 860px) { .detail-grid { grid-template-columns: minmax(0, 1fr); } }
+  .detail-grid h4 { margin: 0 0 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); }
+  .kv { font-size: 12.5px; color: var(--text-secondary); margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; }
+  .kv dt { color: var(--text-muted); } .kv dd { margin: 0; }
+  .more-row { text-align: center; padding: 10px; }
+  .xlinks { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12.5px; margin: 0 0 8px; align-items: baseline; }
+  .xlinks .xl-k, .xl-k { color: var(--text-muted); font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; font-weight: 700; }
+  a.xl-link { color: var(--blue); text-decoration: none; font-weight: 600; } a.xl-link:hover { text-decoration: underline; }
+  .callout { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--blue); border-radius: 0 12px 12px 0; padding: 12px 16px; margin: 0 0 16px; font-size: 13px; color: var(--text-secondary); }
+  .callout ul { margin: 6px 0 0; padding-left: 18px; } .callout li { margin: 3px 0; }
+  .callout b { color: var(--text-primary); }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  footer { padding: 18px 0; } footer p { font-size: 12px; color: var(--text-muted); max-width: 100ch; }
+  footer .mono { overflow-wrap: anywhere; }
+  @media (max-width: 600px) { .panel { padding: 16px 14px; } input[type="search"] { width: 120px; } .filters { position: static; } }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">HPC AI Performance Engineering</p>
+    <nav class="part-nav" aria-label="Report sections">
+      <a class="part-pill" href="index.html">Part 1 &middot; Experiment Catalog</a>
+      <a class="part-pill" href="analysis.html">Part 2 &middot; Analysis &amp; Findings</a>
+      <a class="part-pill" href="studies.html">Part 3 &middot; Detailed Studies</a>
+      <a class="part-pill" href="recommendations.html">Part 4 &middot; Recommendations</a>
+      <a class="part-pill active" href="diagnostics.html" aria-current="page">Part 5 &middot; Diagnostics</a>
+    </nav>
+    <h1>Hardware diagnostics</h1>
+    <p class="lede">
+      What the GPUs were doing while each benchmark ran: utilization, power draw, memory, temperature, clocks,
+      step-time stability and the NCCL all-reduce probe. Use it to check that results were not limited by
+      thermals, power caps, memory pressure or noisy trials before trusting a comparison.
+    </p>
+    <p class="snapshot-line" id="snapshotLine"></p>
+  </div>
+</header>
+
+<form class="filters" id="filters" aria-label="Filters" onsubmit="return false">
+  <div class="wrap">
+    <div class="seg" role="radiogroup" aria-label="Platform">
+      <input type="radio" name="platform" id="pf-all" value="all" checked><label for="pf-all">All GPUs</label>
+      <input type="radio" name="platform" id="pf-h" value="h100"><label for="pf-h">H100</label>
+      <input type="radio" name="platform" id="pf-l" value="l40s"><label for="pf-l">L40S</label>
+    </div>
+    <div class="seg" role="radiogroup" aria-label="Task">
+      <input type="radio" name="mode" id="m-all" value="all" checked><label for="m-all">All tasks</label>
+      <input type="radio" name="mode" id="m-t" value="training"><label for="m-t">Training</label>
+      <input type="radio" name="mode" id="m-i" value="inference"><label for="m-i">Inference</label>
+    </div>
+    <select name="model" id="model" aria-label="Model"><option value="all">All models</option></select>
+    <select name="theme" id="theme" aria-label="Research theme"><option value="all">All themes</option></select>
+    <select name="study" id="study" aria-label="Study"><option value="all">All studies</option></select>
+    <input type="search" name="q" id="q" placeholder="Search E-id…" aria-label="Search experiment ID">
+    <label class="chk"><input type="checkbox" name="flagged" id="flagged"> Flagged only</label>
+    <button type="button" class="btn" id="resetBtn">Reset</button>
+    <span class="count-pill" id="countPill" aria-live="polite"></span>
+  </div>
+</form>
+
+<main class="wrap">
+  <div class="kpi-grid" id="kpis"></div>
+
+  <section class="panel" aria-labelledby="chk-h">
+    <h2 id="chk-h">Health checks</h2>
+    <p class="sub">Each check runs on every condition in the current filter and reports passed, failed, not assessed (a required measurement is missing, or only one trial) and n/a (check does not apply). A ✓ needs every applicable condition assessed and passing. Click a failed count, or “not assessed”, to list those conditions.</p>
+    <div class="checks" id="checks"></div>
+  </section>
+
+  <div class="chart-grid">
+    <section class="panel" aria-labelledby="c1-h"><h2 id="c1-h">Power draw vs utilization</h2>
+      <p class="sub">Mean board power per GPU over the measured region, as a share of the card's nominal limit.</p><div id="chartPower"></div></section>
+    <section class="panel" aria-labelledby="c2-h"><h2 id="c2-h">Memory headroom</h2>
+      <p class="sub">Peak memory on the busiest GPU as a share of its capacity, by model.</p><div id="chartMem"></div></section>
+    <section class="panel" aria-labelledby="c3-h"><h2 id="c3-h">Temperature and clocks</h2>
+      <p class="sub">Hottest reading per condition against the mean SM clock (share of the platform's highest observed clock). Throttling would show as low clocks at high temperature.</p><div id="chartThermal"></div></section>
+    <section class="panel" aria-labelledby="c4-h"><h2 id="c4-h">NCCL all-reduce bandwidth</h2>
+      <p class="sub">Bus bandwidth from the 64 MiB all-reduce probe each multi-GPU training run performs before measuring. Log scale.</p><div id="chartNccl"></div></section>
+  </div>
+
+  <section class="panel" style="margin-top:16px" aria-labelledby="tbl-h">
+    <div class="tbl-head"><h2 id="tbl-h">Conditions</h2><span class="sub-val" id="tblNote" style="font-size:12.5px"></span>
+      <button type="button" class="btn" id="csvBtn">Download CSV</button></div>
+    <div class="tbl-wrap"><table class="data" id="tbl"><thead></thead><tbody></tbody></table></div>
+  </section>
+
+  <div class="callout">
+    <b>How these numbers are measured</b>
+    <ul>
+      <li>nvidia-smi is sampled about every 0.1 s during each trial; values are summaries over the measured region (after warm-up). There are no stored time series.</li>
+      <li><b>Power</b> is recorded per sample as the sum across the job's GPUs and divided here by the GPU count, so it is an <i>average per board</i>: one board can run hotter or closer to its limit than shown, and the power check cannot detect that. Memory and temperature are per-board maxima; utilization and SM clock are means across GPUs. Nominal limits (H100 SXM 700 W, L40S 350 W) are vendor spec values, not read from the cards.</li>
+      <li><b>Memory</b> is the peak on the busiest GPU as nvidia-smi sees it, including PyTorch's cache; vLLM pre-allocates most of the card for its KV cache, so inference runs near capacity by design.</li>
+      <li>Each condition shows the mean of its trials (latest cohort, analysis-eligible), except peaks: hottest temperature, highest power and memory across trials.</li>
+      <li>Older L40S records predate the telemetry scope fields; their power is not normalised per GPU and they are marked <i>legacy</i>.</li>
+    </ul>
+  </div>
+</main>
+
+<footer><div class="wrap"><p id="footSource"></p></div></footer>
+<div class="viz-tip" id="tip" role="tooltip"></div>
+
+<script src="diagnostics-data.js"></script>
+<script src="diagnostics-index.js"></script>
+<script src="links.js"></script>
+<script src="recommendations-data.js"></script>
+<script>
+(function () {
+  const D = DIAG_DATA, ALL = D.conditions, P = D.platforms;
+  const form = document.getElementById('filters');
+  const tip = document.getElementById('tip');
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const f0 = (v, d = 0) => v == null ? '–' : Number(v).toLocaleString('en-GB', { maximumFractionDigits: d, minimumFractionDigits: d });
+  const median = xs => { const s = xs.filter(x => x != null).sort((a, b) => a - b), m = s.length >> 1;
+    return s.length ? (s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2) : null; };
+  const plat = p => P[p].label;
+  const pcol = p => `var(--${p})`;
+
+  // platform reference clocks: highest mean SM clock observed on each platform
+  const maxClock = D.maxClock;
+
+  /* ---------- derived per-condition metrics + checks ---------- */
+  for (const c of ALL) {
+    c.pwrPct = c.pwr != null ? 100 * c.pwr / P[c.platform].nominalW : null;
+    c.pwrPeakPct = c.pwrPeak != null ? 100 * c.pwrPeak / P[c.platform].nominalW : null;
+    c.memPct = c.mem != null && c.cap ? 100 * c.mem / c.cap : null;
+    c.clockPct = c.clock ? 100 * c.clock / maxClock[c.platform] : null;
+    c.jitter = c.stepP50 && c.stepP95 ? c.stepP95 / c.stepP50 : null;
+    c.config = [c.strategy === 'none' ? 'single GPU' : c.strategy, c.precision, c.layout, c.mode === 'training' && c.batch ? `${c.batch}×${c.seq}${c.accum > 1 ? ` ga${c.accum}` : ''}` : null,
+      c.concurrency ? `${c.concurrency} conc` : null].filter(Boolean).join(' · ');
+  }
+  const CHECKS = DIAG_INDEX.checks;   // flags are computed by build_diagnostics.py (one source of truth)
+
+
+  /* ---------- filter options ---------- */
+  const fillSelect = (id, values) => { const s = document.getElementById(id); values.forEach(v => s.add(new Option(v, v))); };
+  fillSelect('model', [...new Set(ALL.map(c => c.model))].sort());
+  fillSelect('theme', [...new Set(ALL.map(c => c.theme).filter(Boolean))].sort());
+  { const s = document.getElementById('study');
+    Object.entries(DIAG_INDEX.studyTitles).forEach(([id, t]) => s.add(new Option(t, id))); }
+
+  let activeCheck = null; // "<check>" lists failures, "<check>:U" lists conditions it could not assess
+  const STATE_CODE = { F: 'failed', U: 'not assessed' };
+  const parseActive = () => { if (!activeCheck) return null; const [id, st = 'F'] = activeCheck.split(':'); const i = CHECKS.findIndex(k => k.id === id); return i < 0 ? null : { id, st, i, k: CHECKS[i] }; };
+  let sortKey = 'id', sortDir = 1, limit = 60, openId = null;
+  const DEFAULTS = { platform: 'all', mode: 'all', model: 'all', theme: 'all', q: '', flagged: false };
+
+  function state() {
+    const fd = new FormData(form);
+    return { platform: fd.get('platform'), mode: fd.get('mode'), model: fd.get('model'), theme: fd.get('theme'), study: fd.get('study'), q: (fd.get('q') || '').trim().toUpperCase(), flagged: fd.get('flagged') === 'on' };
+  }
+  function filtered(s, ignoreCheck) {
+    return ALL.filter(c => (s.platform === 'all' || c.platform === s.platform) && (s.mode === 'all' || c.mode === s.mode) &&
+      (s.model === 'all' || c.model === s.model) && (s.theme === 'all' || c.theme === s.theme) &&
+      (s.study === 'all' || XL.studiesFor(c.id).includes(s.study)) &&
+      (!s.q || c.id.includes(s.q)) && (!s.flagged || c.flags.length) &&
+      (ignoreCheck || !activeCheck || (a => !a || c.checks[a.i] === a.st)(parseActive())));
+  }
+  const key = c => `${c.id}@${c.platform}`;
+  const tipText = c => `${c.id} · ${plat(c.platform)} · ${c.mode}\n${c.model}, ${c.gpus} GPU${c.gpus > 1 ? 's' : ''}${c.config ? ' · ' + c.config : ''}\n` +
+    `Util ${f0(c.util)}% · ${c.pwr != null ? f0(c.pwr) + ' W/GPU (' + f0(c.pwrPct) + '% of nominal)' : 'power n/a'}\n` +
+    `Memory ${f0(c.mem, 1)} GiB${c.memPct != null ? ' (' + f0(c.memPct) + '%)' : ''} · ${c.temp != null ? f0(c.temp) + ' °C' : 'temp n/a'} · ${c.clock ? f0(c.clock) + ' MHz' : ''}` +
+    (c.flags.length ? `\nFlags: ${c.flags.map(f => CHECKS.find(k => k.id === f).label).join(', ')}` : '');
+
+  /* ---------- tooltips + click-to-open ---------- */
+  function bind(root) {
+    root.querySelectorAll('[data-k]').forEach(n => {
+      const c = ALL.find(x => key(x) === n.dataset.k);
+      const show = (x, y) => { tip.textContent = tipText(c); tip.style.display = 'block'; place(x, y); };
+      const place = (x, y) => { const w = tip.offsetWidth, h = tip.offsetHeight; tip.style.left = Math.min(x + 14, innerWidth - w - 8) + 'px'; tip.style.top = (y + 14 + h > innerHeight ? y - h - 10 : y + 14) + 'px'; };
+      n.addEventListener('mouseenter', e => show(e.clientX, e.clientY));
+      n.addEventListener('mousemove', e => place(e.clientX, e.clientY));
+      n.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+      n.addEventListener('focus', () => { const r = n.getBoundingClientRect(); show(r.right, r.top); });
+      n.addEventListener('blur', () => { tip.style.display = 'none'; });
+      const open = () => { tip.style.display = 'none'; openRow(c); };
+      n.addEventListener('click', open);
+      n.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+    });
+  }
+
+  /* ---------- generic scatter ---------- */
+  function scatter(rows, o) {
+    rows = rows.filter(c => o.x(c) != null && o.y(c) != null);
+    if (!rows.length) return '<p class="empty">No conditions with this measurement in the current filter.</p>';
+    const W = 560, H = 300, L = 46, R = 12, T = 10, B = 36;
+    const sx = v => L + (v - o.xd[0]) / (o.xd[1] - o.xd[0]) * (W - L - R);
+    const ly = o.log ? (v => Math.log10(v)) : (v => v);
+    const sy = v => T + (1 - (ly(v) - ly(o.yd[0])) / (ly(o.yd[1]) - ly(o.yd[0]))) * (H - T - B);
+    let g = '';
+    for (const t of o.xt) g += `<line class="grid" x1="${sx(t)}" x2="${sx(t)}" y1="${T}" y2="${H - B}"/><text x="${sx(t)}" y="${H - B + 16}" text-anchor="middle">${o.xf(t)}</text>`;
+    for (const t of o.yt) g += `<line class="grid" x1="${L}" x2="${W - R}" y1="${sy(t)}" y2="${sy(t)}"/><text x="${L - 6}" y="${sy(t) + 4}" text-anchor="end">${o.yf(t)}</text>`;
+    if (o.refY != null) g += `<line class="ref" x1="${L}" x2="${W - R}" y1="${sy(o.refY)}" y2="${sy(o.refY)}"/><text x="${W - R}" y="${sy(o.refY) - 5}" text-anchor="end" class="lbl">${esc(o.refLabel)}</text>`;
+    if (o.refX != null) g += `<line class="ref" x1="${sx(o.refX)}" x2="${sx(o.refX)}" y1="${T}" y2="${H - B}"/><text x="${sx(o.refX) - 4}" y="${T + 10}" text-anchor="end" class="lbl">${esc(o.refXLabel)}</text>`;
+    const clampX = v => Math.min(Math.max(v, o.xd[0]), o.xd[1]), clampY = v => Math.min(Math.max(v, o.yd[0]), o.yd[1]);
+    const jit = c => o.jitter ? (((c.id.charCodeAt(2) * 31 + c.id.charCodeAt(3) * 7) % 11) - 5) * o.jitter : 0;
+    const pts = rows.map(c => {
+      const x = sx(clampX(o.x(c))) + jit(c), y = sy(clampY(o.y(c))), ring = c.mode === 'inference';
+      return `<circle class="pt" data-k="${key(c)}" tabindex="0" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4.5" fill="${ring ? 'var(--surface)' : pcol(c.platform)}" stroke="${ring ? pcol(c.platform) : 'var(--surface)'}" stroke-width="${ring ? 2 : 1}" fill-opacity="${ring ? 1 : 0.85}" aria-label="${esc(tipText(c).replace(/\n/g, '; '))}"/>`;
+    }).join('');
+    const platforms = [...new Set(rows.map(c => c.platform))], modes = [...new Set(rows.map(c => c.mode))];
+    const legend = platforms.map(p => `<span><i style="background:${pcol(p)}"></i>${plat(p)}</span>`).join('') +
+      (modes.length > 1 || modes[0] === 'inference' ? `<span><i style="background:var(--text-muted)"></i>training</span><span><i class="ring"></i>inference</span>` : '');
+    return `<div class="legend">${legend}</div><svg viewBox="0 0 ${W} ${H}" role="group" aria-label="${esc(o.aria)}">
+      ${g}<line class="axis" x1="${L}" x2="${W - R}" y1="${H - B}" y2="${H - B}"/>
+      <text x="${(L + W - R) / 2}" y="${H - 4}" text-anchor="middle" class="lbl">${esc(o.xLabel)}</text>
+      <text x="12" y="${(T + H - B) / 2}" text-anchor="middle" class="lbl" transform="rotate(-90 12 ${(T + H - B) / 2})">${esc(o.yLabel)}</text>
+      ${pts}</svg><figcaption>${rows.length} conditions. ${esc(o.note || '')} Hover for details; click to open in the table.</figcaption>`;
+  }
+
+  /* ---------- memory strip by model ---------- */
+  function memStrip(rows) {
+    rows = rows.filter(c => c.memPct != null);
+    if (!rows.length) return '<p class="empty">No conditions with memory readings in the current filter.</p>';
+    const models = [...new Set(rows.map(c => c.model))].sort((a, b) => median(rows.filter(c => c.model === a).map(c => c.memPct)) - median(rows.filter(c => c.model === b).map(c => c.memPct)));
+    const W = 560, L = 132, R = 12, T = 6, rh = 30, B = 32, H = T + models.length * rh + B;
+    const sx = v => L + Math.min(v, 100) / 100 * (W - L - R);
+    let g = `<rect class="band" x="${sx(90)}" y="${T}" width="${sx(100) - sx(90)}" height="${H - T - B}"/>`;
+    for (const t of [0, 25, 50, 75, 100]) g += `<line class="grid" x1="${sx(t)}" x2="${sx(t)}" y1="${T}" y2="${H - B}"/><text x="${sx(t)}" y="${H - B + 16}" text-anchor="middle">${t}%</text>`;
+    models.forEach((m, i) => { g += `<text class="lbl" x="${L - 10}" y="${T + i * rh + rh / 2 + 4}" text-anchor="end">${esc(m)}</text>`; if (i) g += `<line class="grid" x1="${L}" x2="${W - R}" y1="${T + i * rh}" y2="${T + i * rh}"/>`; });
+    const pts = rows.map(c => {
+      const i = models.indexOf(c.model), off = (c.platform === 'h100' ? -1 : 1) * 6 + ((c.id.charCodeAt(3) % 5) - 2) * 1.2;
+      const ring = c.mode === 'inference';
+      return `<circle class="pt" data-k="${key(c)}" tabindex="0" cx="${sx(c.memPct).toFixed(1)}" cy="${(T + i * rh + rh / 2 + off).toFixed(1)}" r="4" fill="${ring ? 'var(--surface)' : pcol(c.platform)}" stroke="${ring ? pcol(c.platform) : 'var(--surface)'}" stroke-width="${ring ? 2 : 1}" fill-opacity="0.85" aria-label="${esc(tipText(c).replace(/\n/g, '; '))}"/>`;
+    }).join('');
+    const platforms = [...new Set(rows.map(c => c.platform))];
+    return `<div class="legend">${platforms.map(p => `<span><i style="background:${pcol(p)}"></i>${plat(p)} (${f0(P[p].capGiB ?? rows.find(c => c.platform === p).cap, 1)} GiB usable)</span>`).join('')}<span><i style="background:var(--text-muted)"></i>training</span><span><i class="ring"></i>inference</span></div>
+      <svg viewBox="0 0 ${W} ${H}" role="group" aria-label="Peak memory share of capacity by model">${g}<line class="axis" x1="${L}" x2="${W - R}" y1="${H - B}" y2="${H - B}"/>
+      <text x="${(L + W - R) / 2}" y="${H - 2}" text-anchor="middle" class="lbl">Peak memory per GPU (% of capacity)</text>${pts}</svg>
+      <figcaption>Shaded: ≥ 90% of capacity. Inference rings near the right edge are vLLM's up-front KV-cache reservation, not pressure.</figcaption>`;
+  }
+
+  /* ---------- KPIs + checks ---------- */
+  function kpis(rows) {
+    const trials = rows.reduce((a, c) => a + c.n, 0);
+    const hot = rows.filter(c => c.temp != null).sort((a, b) => b.temp - a.temp)[0];
+    const pk = rows.filter(c => c.pwrPeakPct != null).sort((a, b) => b.pwrPeakPct - a.pwrPeakPct)[0];
+    const cells = [
+      [`${f0(rows.length)} <small>/ ${f0(trials)} trials</small>`, 'conditions in view'],
+      [`${f0(median(rows.map(c => c.util)))}%`, 'median GPU utilization'],
+      [`${f0(median(rows.map(c => c.pwrPct)))}%`, 'median power, share of nominal'],
+      [`${f0(median(rows.map(c => c.memPct)))}%`, 'median peak memory, share of capacity'],
+      [hot ? `${f0(hot.temp)} °C` : '–', hot ? `hottest GPU (${hot.id} ${plat(hot.platform)})` : 'hottest GPU'],
+      [pk ? `${f0(pk.pwrPeak)} W` : '–', pk ? `highest peak average per GPU (node ÷ GPUs, ${f0(pk.pwrPeakPct)}% of nominal)` : 'highest peak average per GPU'],
+    ];
+    document.getElementById('kpis').innerHTML = cells.map(([v, l]) => `<div class="kpi"><div class="value">${v}</div><div class="label">${esc(l)}</div></div>`).join('');
+  }
+  // S7 trains on real variable-length text: uneven batches make step times and trial throughput vary by design.
+  const EXPECTED_ON_REAL_TEXT = ['jitter', 'cv'];
+  const isRealText = c => XL.studiesFor(c.id).includes('s7-real-text');
+  const realTextMode = c => typeof RECO_DATA !== 'undefined' && RECO_DATA.realText ? (RECO_DATA.realText.find(r => r.id === c.id) || {}).mode : null;
+  const expected = (c, f) => EXPECTED_ON_REAL_TEXT.includes(f) && isRealText(c);
+  function checks(rows) {
+    document.getElementById('checks').innerHTML = CHECKS.map((k, i) => {
+      const n = { P: 0, F: 0, U: 0, N: 0 };
+      rows.forEach(c => { n[c.checks[i]]++; });
+      const assessed = n.P + n.F;
+      const icon = n.F ? ['warn', '!'] : n.U ? ['unk', '?'] : assessed ? ['ok', '✓'] : ['unk', '–'];
+      const on = st => activeCheck === (st === 'F' ? k.id : k.id + ':U');
+      return `<div class="check${on('F') || on('U') ? ' active' : ''}">
+        <span class="icon ${icon[0]}" aria-hidden="true">${icon[1]}</span>
+        <span><span class="t">${esc(k.t)}</span><br><span class="d">${esc(k.d)}</span>
+          <span class="states">${(() => { const rt = rows.filter(c => c.checks[i] === 'F' && expected(c, k.id)).length; return rt ? `<span class="rt-note">${rt} of ${n.F} failures are real-text runs (S7), where uneven batches are expected</span><br>` : ''; })()}${n.P} passed${n.U ? ` · <button type="button" class="linkish" data-check="${k.id}:U" aria-pressed="${on('U')}">${n.U} not assessed</button>` : ''}${n.N ? ` · ${n.N} n/a` : ''}</span></span>
+        <button type="button" class="n" data-check="${k.id}" aria-pressed="${on('F')}" title="${n.F} of ${assessed} assessed conditions failed" ${n.F ? '' : 'disabled'}>${n.F}<small>failed</small></button></div>`;
+    }).join('');
+    document.querySelectorAll('[data-check]').forEach(b => b.addEventListener('click', () => {
+      activeCheck = activeCheck === b.dataset.check ? null : b.dataset.check; limit = 60; render();
+      if (activeCheck) document.getElementById('tbl-h').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }));
+  }
+
+
+  /* ---------- table ---------- */
+  const COLS = [
+    { k: 'id', l: 'Exp', v: c => `<span class="mono">${c.id}</span>` },
+    { k: 'platform', l: 'GPU', v: c => `<span class="pdot" style="background:${pcol(c.platform)}"></span>${plat(c.platform)}` },
+    { k: 'mode', l: 'Task', v: c => c.mode },
+    { k: 'model', l: 'Model', v: c => esc(c.model) },
+    { k: 'gpus', l: 'GPUs', num: true, v: c => c.gpus },
+    { k: 'config', l: 'Config', v: c => `<span class="sub-val">${esc(c.config)}</span>` },
+    { k: 'util', l: 'Util %', num: true, v: c => f0(c.util) },
+    { k: 'pwr', l: 'Avg W / GPU', num: true, v: c => c.pwr == null ? '–' : `${f0(c.pwr)} <span class="sub-val">pk ${f0(c.pwrPeak)}</span>` },
+    { k: 'pwrPct', l: '% nominal', num: true, v: c => c.pwrPct == null ? '–' : `${f0(c.pwrPct)}<span class="meter"><b class="${c.pwrPeakPct >= 95 ? 'hi' : ''}" style="width:${Math.min(100, c.pwrPct)}%"></b></span>` },
+    { k: 'mem', l: 'Mem GiB', num: true, v: c => c.mem == null ? '–' : `${f0(c.mem, 1)}<span class="meter"><b class="${c.memPct >= 90 ? 'hi' : ''}" style="width:${Math.min(100, c.memPct || 0)}%"></b></span>` },
+    { k: 'temp', l: 'Max °C', num: true, v: c => f0(c.temp) },
+    { k: 'clock', l: 'SM MHz', num: true, v: c => f0(c.clock) },
+    { k: 'stepP50', l: 'Step p50 / p95 ms', num: true, v: c => c.stepP50 == null ? '–' : `${f0(c.stepP50, c.stepP50 < 100 ? 1 : 0)} <span class="sub-val">/ ${f0(c.stepP95, c.stepP95 < 100 ? 1 : 0)}</span>` },
+    { k: 'nccl', l: 'NCCL GB/s', num: true, v: c => f0(c.nccl, 1) },
+    { k: 'cv', l: 'CV %', num: true, v: c => f0(c.cv, 1) },
+    { k: 'flags', l: 'Checks', v: c => (c.flags.map(f => `<span class="flag${expected(c, f) ? ' exp' : ''}"${expected(c, f) ? ' title="Expected on real variable-length text (S7)"' : ''}>${esc(CHECKS.find(k => k.id === f).label)}${expected(c, f) ? ' · expected' : ''}</span>`).join('') +
+        ((c.unknown || []).length ? `<span class="flag unk" title="Not assessed: ${esc(c.unknown.map(f => CHECKS.find(k => k.id === f).t).join(', '))}">? ${c.unknown.length} not assessed</span>` : '')) || '<span class="sub-val">all pass</span>' },
+  ];
+  function sortVal(c, k) { const v = k === 'flags' ? c.flags.length : c[k]; return v == null ? (sortDir > 0 ? Infinity : -Infinity) : v; }
+  function table(rows) {
+    const t = document.getElementById('tbl');
+    t.tHead.innerHTML = `<tr>${COLS.map(c => `<th class="${c.num ? 'num' : ''}" aria-sort="${sortKey === c.k ? (sortDir > 0 ? 'ascending' : 'descending') : 'none'}"><button type="button" data-sort="${c.k}">${c.l}</button></th>`).join('')}</tr>`;
+    const sorted = [...rows].sort((a, b) => { const x = sortVal(a, sortKey), y = sortVal(b, sortKey); return (x > y ? 1 : x < y ? -1 : key(a) > key(b) ? 1 : -1) * sortDir; });
+    const shown = sorted.slice(0, limit);
+    let html = shown.map(c => {
+      const open = openId === key(c);
+      return `<tr class="row${open ? ' open' : ''}" data-row="${key(c)}" tabindex="0" aria-expanded="${open}">${COLS.map(col => `<td class="${col.num ? 'num' : ''}">${col.v(c)}</td>`).join('')}</tr>` + (open ? detail(c) : '');
+    }).join('');
+    if (sorted.length > shown.length) html += `<tr><td colspan="${COLS.length}" class="more-row"><button type="button" class="btn" id="moreBtn">Show ${Math.min(100, sorted.length - shown.length)} more of ${sorted.length - shown.length}</button></td></tr>`;
+    if (!sorted.length) html = `<tr><td colspan="${COLS.length}" class="empty">No conditions match the filters.</td></tr>`;
+    t.tBodies[0].innerHTML = html;
+    const act = parseActive(), chk = act && act.k;
+    document.getElementById('tblNote').innerHTML = chk ? `Showing conditions where “${esc(chk.t)}” ${act.st === 'U' ? 'could not be assessed' : 'failed'} · <a href="#" id="clearChk">clear</a>` : 'Click a row for per-trial values.';
+    const cl = document.getElementById('clearChk'); if (cl) cl.addEventListener('click', e => { e.preventDefault(); activeCheck = null; render(); });
+    t.tHead.querySelectorAll('[data-sort]').forEach(b => b.addEventListener('click', () => { const k = b.dataset.sort; sortDir = sortKey === k ? -sortDir : (['id', 'platform', 'mode', 'model', 'config'].includes(k) ? 1 : -1); sortKey = k; table(rows); }));
+    t.tBodies[0].querySelectorAll('tr.row').forEach(r => {
+      const tog = () => { openId = openId === r.dataset.row ? null : r.dataset.row; writeHash(state()); table(rows); };
+      r.addEventListener('click', tog); r.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tog(); } });
+    });
+    const more = document.getElementById('moreBtn'); if (more) more.addEventListener('click', () => { limit += 100; table(rows); });
+  }
+  function detail(c) {
+    const th = ['Trial', 'Tokens/s', 'Util %', 'Avg W / GPU', 'Peak avg W', 'Mem GiB', 'Alloc / reserved', 'Max °C', 'SM MHz', 'Step p50 / p95', 'NCCL GB/s', 'Samples', 'Telemetry'];
+    const tr = c.trials.map(t => `<tr><td class="mono">r${t.rep ?? '?'}</td><td class="num">${f0(t.tps)}</td><td class="num">${f0(t.util, 1)}</td><td class="num">${f0(t.pwr)}</td><td class="num">${f0(t.pwrPeak)}</td><td class="num">${f0(t.mem, 2)}</td>
+      <td class="num">${t.alloc != null ? f0(t.alloc, 1) + ' / ' + f0(t.reserved, 1) : '–'}</td><td class="num">${f0(t.temp)}</td><td class="num">${f0(t.clock)}</td>
+      <td class="num">${t.stepP50 != null ? f0(t.stepP50, 1) + ' / ' + f0(t.stepP95, 1) : '–'}</td><td class="num">${f0(t.nccl, 1)}</td><td class="num">${f0(t.samples)}</td><td>${esc(t.telemetry || '–')}</td></tr>`).join('');
+    const flags = c.flags.map(f => { const k = CHECKS.find(x => x.id === f); return `<li><b>${esc(k.t)}</b> failed: ${esc(k.d)}${expected(c, f) ? ` — expected here: this is a real-text run (S7, ${esc(realTextMode(c) || 'variable-length input')}), where batches differ in length from step to step. <a class="xl-link" href="analysis.html#real-text">Why →</a>` : ''}</li>`; }).join('') +
+      (c.unknown || []).map(f => { const k = CHECKS.find(x => x.id === f); return `<li><b>${esc(k.t)}</b> not assessed: ${f === 'cv' ? 'only one trial' : 'measurement not recorded'}</li>`; }).join('');
+    const kv = [['Theme', c.theme], ['Phase', c.phase], ['Config', c.config], ['Node power', c.pwrNode != null ? f0(c.pwrNode) + ' W (all GPUs)' : '–'],
+      ['Energy', c.energy != null ? f0(c.energy / 1000, 1) + ' kJ per trial' : '–'], ['J / token', c.jTok != null ? f0(c.jTok, 4) : '–'],
+      ['Data loading', c.dataLoad != null ? f0(c.dataLoad, 2) + ' s' : '–'], ['Measured', c.seconds != null ? f0(c.seconds) + ' s per trial' : '–'],
+      ['Weights', c.weights != null ? f0(c.weights, 2) + ' GiB' : null], ['Max sample gap', c.gap != null ? f0(c.gap, 2) + ' s' : '–']].filter(([, v]) => v != null);
+    return `<tr class="detail"><td colspan="${COLS.length}"><div class="detail-grid">
+      <div><h4>Trials (${c.n})</h4><div class="tbl-wrap"><table class="data"><thead><tr>${th.map((h, i) => `<th class="${i && i < 12 ? 'num' : ''}">${h}</th>`).join('')}</tr></thead><tbody>${tr}</tbody></table></div>
+        <p class="sub-val" style="font-size:11.5px;margin:6px 0 0">Raw records: <span class="mono">results/raw/${c.platform}/${c.id}/</span>${c.trials.map(t => `<br><span class="mono">${esc(t.run)}.json</span>`).join('')}</p></div>
+      <div><h4>Condition</h4>${crossLinks(c)}<dl class="kv">${kv.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
+        ${flags ? `<h4 style="margin-top:12px">Health checks</h4><ul style="margin:0;padding-left:18px;font-size:12.5px;color:var(--text-secondary)">${flags}</ul>` : ''}</div>
+    </div></td></tr>`;
+  }
+  function crossLinks(c) {
+    const studies = XL.studiesFor(c.id);
+    const RD = typeof RECO_DATA !== 'undefined' ? RECO_DATA : null;
+    const cited = (RD ? RD.contrasts.filter(x => x.platform === c.platform && x.ids.split(/\s*→\s*/).includes(c.id)) : []);
+    const levers = [...new Map(cited.map(x => [x.lever, x])).values()].slice(0, 4);
+    const layout = RD && RD.layouts.some(l => l.id === c.id && l.platform === c.platform);
+    return `<p class="xlinks"><a class="xl-link" href="${XL.catalog(c.id)}">Catalog entry →</a>
+      <a class="xl-link" href="${XL.reco({ mode: c.mode, params: c.params, platform: c.platform, gpus: c.gpus, concurrency: c.concurrency })}">Recommendations for this setup →</a></p>
+      ${studies.length ? `<p class="xlinks"><span class="xl-k">Studies</span> ${studies.map(sid => `<a class="xl-link" href="${XL.study(sid)}">${esc(XL.studyTitle(sid))}</a>`).join(' · ')}</p>` : ''}
+      ${levers.length || layout ? `<p class="xlinks"><span class="xl-k">Cited by recommendations</span> ${[...levers.map(x => `${esc(x.treatment)} vs ${esc(x.control)}`), ...(layout ? ['serving-layout ranking'] : [])].map(t => `<a class="xl-link" href="${XL.reco({ mode: c.mode, params: c.params, platform: c.platform, gpus: c.gpus, concurrency: c.concurrency })}">${t}</a>`).join(' · ')}</p>` : ''}`;
+  }
+  function openRow(c) {
+    const s = state();
+    if (!filtered(s).includes(c)) { activeCheck = null; if (!filtered(state()).includes(c)) { form.reset(); } }
+    openId = key(c); sortKey = 'id'; sortDir = 1;
+    const rows = filtered(state());
+    const idx = [...rows].sort((a, b) => key(a) > key(b) ? 1 : -1).indexOf(c);
+    limit = Math.max(limit, idx + 1);
+    render();
+    const r = document.querySelector(`tr[data-row="${CSS.escape(openId)}"]`);
+    if (r) { r.scrollIntoView({ behavior: 'smooth', block: 'center' }); r.focus({ preventScroll: true }); }
+  }
+
+  /* ---------- CSV ---------- */
+  function csv(rows) {
+    const cols = ['id', 'platform', 'mode', 'model', 'gpus', 'config', 'n', 'tps', 'util', 'utilMax', 'pwr', 'pwrPeak', 'pwrPct', 'pwrNode', 'mem', 'cap', 'memPct', 'alloc', 'reserved', 'temp', 'clock', 'stepP50', 'stepP95', 'nccl', 'cv', 'energy', 'jTok', 'telemetry', 'flags'];
+    const q = v => { v = Array.isArray(v) ? v.join(';') : v ?? ''; return /[",\n]/.test(v) ? `"${String(v).replace(/"/g, '""')}"` : v; };
+    const text = [cols.join(','), ...rows.map(c => cols.map(k => q(typeof c[k] === 'number' ? +c[k].toFixed(4) : c[k])).join(','))].join('\n');
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: 'text/csv' })); a.download = 'diagnostics-conditions.csv'; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+
+  /* ---------- render ---------- */
+  function writeHash(s) {
+    const p = new URLSearchParams();
+    for (const [k, v] of Object.entries(s)) if (v && v !== 'all') p.set(k, v === true ? '1' : v);
+    if (activeCheck) p.set('check', activeCheck);
+    if (openId) p.set('open', openId);
+    const h = p.toString();
+    if (location.hash.slice(1) !== h) history.replaceState(null, '', h ? '#' + h : location.pathname);
+  }
+  function readHash() {
+    const p = new URLSearchParams(location.hash.slice(1));
+    form.reset();
+    for (const k of ['platform', 'mode', 'model', 'theme', 'study']) {
+      const v = p.get(k); if (!v) continue;
+      const f = form.elements[k];
+      if (f instanceof RadioNodeList) form.querySelectorAll(`[name="${k}"]`).forEach(r => { r.checked = r.value === v; });
+      else if ([...f.options].some(o => o.value === v)) f.value = v;
+    }
+    document.getElementById('q').value = p.get('q') || '';
+    document.getElementById('flagged').checked = p.get('flagged') === '1';
+    activeCheck = p.get('check'); if (!parseActive()) activeCheck = null;
+    openId = null; limit = 60;
+    const o = p.get('open'), c = o && ALL.find(x => key(x) === o);
+    return c || null;
+  }
+  function render() {
+    const s = state();
+    writeHash(s);
+    const base = filtered(s, true), rows = filtered(s);
+    document.getElementById('countPill').textContent = `${rows.length} of ${ALL.length} conditions`;
+    kpis(rows); checks(base);
+    const pw = document.getElementById('chartPower');
+    pw.innerHTML = scatter(rows, { x: c => c.util, y: c => c.pwrPct, xd: [0, 100], yd: [0, 110], xt: [0, 25, 50, 75, 100], yt: [0, 25, 50, 75, 100], xf: t => t + '%', yf: t => t + '%',
+      refY: 100, refLabel: 'nominal limit', xLabel: 'GPU utilization (mean, %)', yLabel: 'Power per GPU (% of nominal)', aria: 'Power draw against utilization', note: 'Legacy records without scope are omitted.' });
+    document.getElementById('chartMem').innerHTML = memStrip(rows);
+    document.getElementById('chartThermal').innerHTML = scatter(rows, { x: c => c.temp, y: c => c.clockPct, xd: [20, 90], yd: [30, 102], xt: [20, 40, 60, 80], yt: [40, 60, 80, 100], xf: t => t + ' °C', yf: t => t + '%',
+      refX: 80, refXLabel: '80 °C', xLabel: 'Hottest GPU (°C)', yLabel: 'Mean SM clock (% of platform max)', aria: 'Temperature against SM clock', note: `Platform max: ${Object.entries(maxClock).map(([p, v]) => plat(p) + ' ' + f0(v) + ' MHz').join(', ')}.` });
+    const gpuTicks = [2, 4, 8];
+    document.getElementById('chartNccl').innerHTML = scatter(rows.filter(c => c.gpus > 1), { x: c => Math.log2(c.gpus), y: c => c.nccl, xd: [0.6, 3.4], yd: [5, 400], xt: [1, 2, 3], yt: [5, 10, 20, 50, 100, 200, 400], xf: t => gpuTicks[t - 1] + ' GPUs', yf: t => t,
+      log: true, jitter: 3.5, xLabel: 'GPUs in the job', yLabel: 'Bus bandwidth (GB/s)', aria: 'NCCL all-reduce bandwidth by GPU count', note: 'Points jittered horizontally.' });
+    ['chartPower', 'chartMem', 'chartThermal', 'chartNccl'].forEach(id => bind(document.getElementById(id)));
+    table(rows);
+  }
+
+  document.getElementById('snapshotLine').textContent =
+    `${ALL.length} conditions · ${ALL.reduce((a, c) => a + c.n, 0)} trials (latest cohort, analysis-eligible) · evidence through ${D.evidenceDate.slice(0, 10)}`;
+  document.getElementById('footSource').innerHTML = `Data: <span class="mono">${esc(D.generatedFrom.join(' + '))}</span>, joined by run and SHA-256 checked, via <span class="mono">scripts/build_dashboard_diagnostics.py</span>.`;
+  form.addEventListener('input', () => { limit = 60; render(); });
+  document.getElementById("resetBtn").addEventListener('click', () => { form.reset(); activeCheck = null; openId = null; limit = 60; render(); });
+  document.getElementById('csvBtn').addEventListener('click', () => csv(filtered(state())));
+  function fromHash() { const c = readHash(); if (c) openRow(c); else render(); }
+  addEventListener('hashchange', fromHash);
+  fromHash();
+})();
+</script>
+</body>
+</html>
